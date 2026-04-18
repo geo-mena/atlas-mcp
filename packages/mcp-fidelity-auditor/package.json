@@ -1,0 +1,31 @@
+{
+  "name": "@atlas/mcp-fidelity-auditor",
+  "version": "0.1.0-alpha.0",
+  "private": true,
+  "description": "Deterministic fidelity auditor MCP server for Atlas — byte-level diff with per-content-type normalization, fail-closed gating",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "atlas-mcp-fidelity-auditor": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "dev": "tsup src/index.ts --format esm --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@atlas/shared": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "microdiff": "^1.4.0",
+    "parse5": "^7.1.2",
+    "pdf-parse": "^1.1.1",
+    "xml-c14n": "^0.1.6",
+    "xmldsigjs": "^2.6.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/pdf-parse": "^1.1.4"
+  }
+}

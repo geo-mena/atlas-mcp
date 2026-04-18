@@ -1,0 +1,66 @@
+{
+  "_note": "Plugin settings shipped to end users. Field names marked _verify still need confirmation against the Claude Code settings.json schema during build week (Q22 in Obsidian 08 — Open Questions).",
+  "minimumClaudeCodeVersion": "TBD-pin-after-build-week",
+  "mcpServers": {
+    "atlas-scratchpad": {
+      "command": "node",
+      "args": ["./packages/mcp-scratchpad/dist/index.js"]
+    },
+    "atlas-synthesizer": {
+      "command": "node",
+      "args": ["./packages/mcp-synthesizer/dist/index.js"]
+    },
+    "atlas-fidelity-auditor": {
+      "command": "node",
+      "args": ["./packages/mcp-fidelity-auditor/dist/index.js"]
+    },
+    "atlas-traffic-sniffer": {
+      "command": "node",
+      "args": ["./packages/mcp-traffic-sniffer/dist/index.js"]
+    }
+  },
+  "agents": {
+    "_verify_field_name": "Confirm whether per-subagent allowed-tools live under 'agents.<name>.allowedTools' or a different key in the current Claude Code schema.",
+    "code-spelunker": {
+      "allowedTools": [
+        "mcp__atlas-scratchpad__*",
+        "mcp__filesystem__*",
+        "Read",
+        "Glob",
+        "Grep",
+        "Bash(tree-sitter:*)"
+      ]
+    },
+    "ui-explorer": {
+      "allowedTools": [
+        "mcp__atlas-scratchpad__*",
+        "mcp__playwright__*"
+      ]
+    },
+    "traffic-sniffer": {
+      "allowedTools": [
+        "mcp__atlas-scratchpad__*",
+        "mcp__atlas-traffic-sniffer__*"
+      ]
+    },
+    "doc-harvester": {
+      "allowedTools": [
+        "mcp__atlas-scratchpad__*",
+        "mcp__filesystem__*",
+        "mcp__exa__*",
+        "Read",
+        "Grep"
+      ]
+    }
+  },
+  "hooks": {
+    "_verify_field_name": "Confirm hook event name. Intended: fire before any Write/Edit that targets a path outside the active run directory (.atlas/runs/<run-id>/).",
+    "pre-promote": {
+      "command": "./.claude/hooks/pre-promote.sh",
+      "events": ["pre-tool-use:Write", "pre-tool-use:Edit", "pre-tool-use:MultiEdit"],
+      "matcher": {
+        "pathOutside": ".atlas/runs/"
+      }
+    }
+  }
+}

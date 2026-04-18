@@ -1,0 +1,43 @@
+{
+  "name": "atlas-mcp",
+  "version": "0.1.0-alpha.0",
+  "private": true,
+  "description": "Claude Code-native plugin that reverse-engineers legacy software into deployable OpenAPI + MCP + fidelity tests",
+  "license": "MIT",
+  "packageManager": "pnpm@9.12.0",
+  "engines": {
+    "node": ">=20.11.0 <21",
+    "pnpm": ">=9 <10"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "pnpm -r --filter './packages/*' run build",
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write .",
+    "typecheck": "pnpm -r --filter './packages/*' run typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "dev": "pnpm -r --parallel --filter './packages/*' run dev",
+    "smoke": "tsx scripts/smoke.ts",
+    "sandbox:up": "docker compose -f apps/sandbox/docker-compose.yml up -d",
+    "sandbox:down": "docker compose -f apps/sandbox/docker-compose.yml down",
+    "sandbox:seed": "docker compose -f apps/sandbox/docker-compose.yml exec -T mysql mysql -uroot -proot atlas_sandbox < apps/sandbox/db/seed.sql",
+    "sandbox:reset": "docker compose -f apps/sandbox/docker-compose.yml down -v && pnpm sandbox:up && sleep 5 && pnpm sandbox:seed"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.10.0",
+    "eslint-plugin-import": "^2.30.0",
+    "prettier": "^3.3.3",
+    "tsup": "^8.2.4",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^2.1.0"
+  }
+}

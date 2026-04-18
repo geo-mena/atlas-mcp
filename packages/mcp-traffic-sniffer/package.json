@@ -1,0 +1,25 @@
+{
+  "name": "@atlas/mcp-traffic-sniffer",
+  "version": "0.1.0-alpha.0",
+  "private": true,
+  "description": "Traffic sniffer MCP server for Atlas — Playwright Node SDK + mitmproxy subprocess, captures golden HAR + nock cassettes",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "atlas-mcp-traffic-sniffer": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "dev": "tsup src/index.ts --format esm --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@atlas/shared": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "nock": "^13.5.5",
+    "playwright": "^1.47.0",
+    "zod": "^3.23.8"
+  }
+}

@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Test output
+coverage/
+.vitest-cache/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Atlas runtime
+.atlas/runs/
+.atlas/cache/
+
+# Claude Code dev-only settings (full perms)
+.claude/settings.local.json
+
+# Editor
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# PHP sandbox
+apps/sandbox/php/vendor/
+
+# SENIAT mock dist
+apps/sandbox/seniat-mock/dist/

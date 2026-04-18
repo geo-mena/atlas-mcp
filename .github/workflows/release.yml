@@ -1,0 +1,12 @@
+name: Release
+
+# Placeholder workflow. Real release pipeline lands post-MVP (see Obsidian 08 — Open Questions Q21).
+
+on:
+  workflow_dispatch:
+
+jobs:
+  noop:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Release pipeline TODO post-MVP"

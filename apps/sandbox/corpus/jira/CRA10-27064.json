@@ -1,0 +1,42 @@
+{
+  "_note": "Synthetic Jira ticket for the Atlas sandbox. Mirrors the SHAPE of a real reverse-engineering analysis story without any ExampleCorp- or DHL-specific content.",
+  "key": "CRA10-27064",
+  "summary": "Reverse engineer the existing Venezuela eBilling (VE) implementation from the legacy monolith and produce complete functional and technical documentation to enable replication on the new platform.",
+  "status": "Open",
+  "priority": "High",
+  "issuetype": "Analysis",
+  "assignee": "atlas-bot",
+  "reporter": "examplecorp-platform",
+  "labels": ["reverse-engineering", "ebilling", "venezuela", "sandbox"],
+  "components": ["eBilling", "VE"],
+  "description": "Analyze the existing implementation of the Venezuela electronic billing (eBilling VE) process in the legacy version of the application and document all components needed to replicate it on the new platform. The documentation must cover UI behavior, configuration / catalog dependencies, integration with external services, request / response structures, and error handling flows. The outcome is a reference document sufficient for a developer to rebuild the feature end-to-end without referencing the legacy code.",
+  "scope_of_work": [
+    "Functional flow analysis — invoice creation trigger, data preparation, external service interaction, response handling, status updates, end-to-end lifecycle Draft → Authorized / Rejected",
+    "User interface documentation — invoice creation / edit screens, submission triggers, status visualization, error display, field-level behavior, validations, conditional flows",
+    "Catalogs and configuration — document types, tax codes, currency settings, customer identification types, fiscal / control number handling; source of catalogs and required values",
+    "External service integration — eBilling regulator endpoints, authentication mechanism, communication protocol, headers, security requirements",
+    "Request construction — payload structure (XML), required fields, formats, field-by-field mapping from internal models to external API",
+    "Response handling — success responses (authorized invoice, control number assignment), validation errors, rejections, parsing logic, status mapping, persistence",
+    "Error handling and edge cases — API errors, validation failures, business rule errors, retry logic, user feedback, logging",
+    "Data persistence — tables / entities involved, stored fields, audit / logging requirements",
+    "Compliance considerations — authorized billing systems, unique sequential invoice numbering, storage and audit requirements; gaps between legacy implementation and current regulations",
+    "Gaps and recommendations — missing functionality, deprecated logic, recommendations for improvement / standardization / reusability"
+  ],
+  "acceptance_criteria": [
+    "Legacy eBilling VE process is fully analyzed and documented end-to-end",
+    "All UI components and flows are clearly described",
+    "All catalogs and configurations are identified and mapped",
+    "External integrations are fully documented (endpoints, payloads, auth)",
+    "Request and response structures are defined with examples",
+    "Error handling scenarios are documented with expected behavior",
+    "Documentation is sufficient for a developer to implement the feature in the new system without referencing the legacy code"
+  ],
+  "deliverables": [
+    "Architecture diagram",
+    "Sequence diagrams (request / response flow)",
+    "Data mapping tables",
+    "Sample payloads",
+    "UI wireframes",
+    "API documentation (requests / responses / errors)"
+  ]
+}
