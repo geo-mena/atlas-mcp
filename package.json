@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@atlas/mcp-scratchpad": "workspace:*",
+    "@atlas/mcp-traffic-sniffer": "workspace:*",
     "@atlas/shared": "workspace:*"
   },
   "devDependencies": {

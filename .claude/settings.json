@@ -16,7 +16,7 @@
     },
     "atlas-traffic-sniffer": {
       "command": "node",
-      "args": ["./packages/mcp-traffic-sniffer/dist/index.js"]
+      "args": ["./packages/mcp-traffic-sniffer/dist/bin.js"]
     }
   },
   "agents": {
