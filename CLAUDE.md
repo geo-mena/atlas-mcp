@@ -71,7 +71,42 @@ DHL eBilling reverse-engineering. Reference Jira: `CRA10-27064` (Venezuela / SEN
 - Documentation tone: Principal Engineer — formal, technical, no value-adjectives ("robust", "comprehensive", "powerful"), no filler. Parentheses only for brief technical clarifications, abbreviations, units, references.
 - Mermaid diagrams only when prose cannot convey the information.
 - Source fidelity: never invent. Mark unknowns as TBD.
-- Comments in code: default to none. Only when the WHY is non-obvious.
+
+## Clean Code Principles
+
+### Naming
+- Names that reveal intent: `daysSinceLastTransaction` instead of `d`.
+- Follow language conventions: camelCase, snake_case, PascalCase as appropriate.
+- No ambiguous abbreviations or unnecessary prefixes.
+
+### Functions
+- Small, single-purpose. If you need "and" to describe what it does, split it.
+- Short functions as a guideline, not a rigid rule. Prioritize readability over arbitrary metrics.
+- Parameters: ideally ≤3. If more are needed, use an object/DTO.
+
+### Structure
+- DRY: duplicated code is multiplied technical debt. Extract to shared functions, utilities, or modules.
+- Principle of least surprise: code should do exactly what its name suggests.
+- Early return to reduce nesting.
+
+### Error Handling
+- Explicit handling: never silently ignore exceptions.
+- Specific errors over generic ones. Descriptive messages that aid debugging.
+- Validate inputs at system boundaries (controllers, handlers, APIs).
+
+### Comments
+- Only when they add value: explain the WHY, never the WHAT.
+- If you need many comments, the code needs refactoring.
+- TODO/FIXME with context: `// TODO(geovanni): migrate to new API when v1 is deprecated`
+
+## Legacy Code
+- Prioritize consistency with surrounding code over isolated "best practices".
+- Propose refactors as a separate step, never mix them with the main task.
+
+## When Delivering Code
+- Brief summary of changes and reasoning behind non-obvious decisions.
+- If there are trade-offs, mention them.
+- If multiple files were touched, list which ones and why.
 
 ## Commands
 
