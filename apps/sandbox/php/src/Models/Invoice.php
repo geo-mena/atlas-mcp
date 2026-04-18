@@ -16,6 +16,7 @@ final class Invoice
     public ?string $control_number = null;
     public ?string $fiscal_sequence = null;
     public string $currency = 'USD';
+    public float $total_amount = 0.0;
     public string $created_at = '';
     public ?string $authorized_at = null;
 }
