@@ -10,11 +10,12 @@
  */
 
 import type { ChildProcess } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import { EventEmitter } from 'node:events';
 import { strict as assert } from 'node:assert';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 
 import { Scratchpad, readFacts, writeFact } from '@atlas/mcp-scratchpad';
 import { Proxy, parseHar, summarizeHar, type Spawner } from '@atlas/mcp-traffic-sniffer';
@@ -22,7 +23,8 @@ import { Proxy, parseHar, summarizeHar, type Spawner } from '@atlas/mcp-traffic-
 function main(): void {
   smokeScratchpad();
   smokeTrafficSniffer();
-  process.stdout.write('atlas smoke OK (Day 2: scratchpad + traffic-sniffer)\n');
+  smokeAgentValidator();
+  process.stdout.write('atlas smoke OK (Day 3: scratchpad + traffic-sniffer + agent validator)\n');
 }
 
 function smokeScratchpad(): void {
@@ -104,6 +106,17 @@ function smokeTrafficSniffer(): void {
   const summary = summarizeHar(har.log.entries);
   assert.equal(summary.count, 1);
   assert.equal(summary.methods['POST'], 1);
+}
+
+function smokeAgentValidator(): void {
+  // Run validate-agents.ts as a subprocess; assert it exits 0 and prints OK.
+  const validatorPath = resolve(process.cwd(), 'scripts', 'validate-agents.ts');
+  const result = spawnSync('npx', ['tsx', validatorPath], {
+    cwd: process.cwd(),
+    encoding: 'utf8',
+  });
+  assert.equal(result.status, 0, `validator exited ${result.status}; stderr: ${result.stderr}`);
+  assert.match(result.stdout, /atlas validate-agents: OK/, `unexpected stdout: ${result.stdout}`);
 }
 
 main();
