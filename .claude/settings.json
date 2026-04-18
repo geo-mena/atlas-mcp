@@ -4,7 +4,7 @@
   "mcpServers": {
     "atlas-scratchpad": {
       "command": "node",
-      "args": ["./packages/mcp-scratchpad/dist/index.js"]
+      "args": ["./packages/mcp-scratchpad/dist/bin.js"]
     },
     "atlas-synthesizer": {
       "command": "node",

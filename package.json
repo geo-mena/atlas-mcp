@@ -27,6 +27,10 @@
     "sandbox:seed": "docker compose -f apps/sandbox/docker-compose.yml exec -T mysql mysql -uroot -proot atlas_sandbox < apps/sandbox/db/seed.sql",
     "sandbox:reset": "docker compose -f apps/sandbox/docker-compose.yml down -v && pnpm sandbox:up && sleep 5 && pnpm sandbox:seed"
   },
+  "dependencies": {
+    "@atlas/mcp-scratchpad": "workspace:*",
+    "@atlas/shared": "workspace:*"
+  },
   "devDependencies": {
     "@types/node": "^20.14.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
