@@ -17,15 +17,12 @@
   },
   "dependencies": {
     "@atlas/shared": "workspace:*",
-    "@modelcontextprotocol/sdk": "^1.0.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "microdiff": "^1.4.0",
     "parse5": "^7.1.2",
-    "pdf-parse": "^1.1.1",
-    "xml-c14n": "^0.1.6",
-    "xmldsigjs": "^2.6.0",
+    "pdf-parse": "^2.4.5",
+    "xml-c14n": "^0.0.6",
+    "xml-crypto": "^6.1.2",
     "zod": "^3.23.8"
-  },
-  "devDependencies": {
-    "@types/pdf-parse": "^1.1.4"
   }
 }

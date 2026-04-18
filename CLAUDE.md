@@ -24,7 +24,7 @@ The project is general-purpose. The Anthropic "Built with Opus 4.7" hackathon is
 - **Atlas-shipped MCP servers** (TypeScript, in `packages/`):
   - `mcp-scratchpad` — SQLite via `better-sqlite3`, Postgres-ready schema
   - `mcp-synthesizer` — deterministic chained-plan conflict resolution (no LLM calls)
-  - `mcp-fidelity-auditor` — deterministic byte-level diff with `microdiff` / `xml-c14n` / `xmldsigjs` / `parse5` / `pdf-parse`
+  - `mcp-fidelity-auditor` — deterministic byte-level diff with `microdiff` / `xml-c14n` / `xml-crypto` / `parse5` / `pdf-parse`
   - `mcp-traffic-sniffer` — Playwright Node SDK + mitmproxy subprocess
 - **External MCPs consumed**: official Playwright MCP, Filesystem MCP, Exa MCP.
 - **Generators** (TS modules in plugin code, not MCPs): `emit-openapi`, `emit-mcp-server`, `emit-test-suite`.
@@ -96,7 +96,7 @@ DHL eBilling reverse-engineering. Reference Jira: `CRA10-27064` (Venezuela / SEN
 - Don't generate normalization rules with LLMs in v0.1 — false-pass risk is too high.
 - Don't ship Python code. TypeScript only for v0.1; Python output target deferred to v0.2.
 - Don't bypass the `pre-promote` hook on FAIL or unattended HUMAN-REVIEW. The auditor is fail-closed by design.
-- Don't masquerade timestamp / fiscal sequence masking as semantic equivalence — for signed XML, re-verify the signature with `xmldsigjs`.
+- Don't masquerade timestamp / fiscal sequence masking as semantic equivalence — for signed XML, re-verify the signature with `xml-crypto`.
 
 ## Open questions (non-blocking for the build)
 

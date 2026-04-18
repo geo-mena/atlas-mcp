@@ -10,7 +10,7 @@
  *
  * Diff stack per content type:
  *   application/json → microdiff
- *   application/xml  → xml-c14n + microdiff on parsed tree (+ xmldsigjs for signed envelopes)
+ *   application/xml  → xml-c14n + microdiff on parsed tree (+ xml-crypto for signed envelopes)
  *   text/html        → parse5 canonicalization + text diff
  *   application/pdf  → pdf-parse text extraction + text diff
  *   binary           → SHA-256 equality after content-type-aware stripping
