@@ -29,6 +29,7 @@
     "sandbox:reset": "docker compose -f apps/sandbox/docker-compose.yml down -v && pnpm sandbox:up && sleep 5 && pnpm sandbox:seed"
   },
   "dependencies": {
+    "@atlas/generators": "workspace:*",
     "@atlas/mcp-scratchpad": "workspace:*",
     "@atlas/mcp-synthesizer": "workspace:*",
     "@atlas/mcp-traffic-sniffer": "workspace:*",

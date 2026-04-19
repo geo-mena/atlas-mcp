@@ -20,13 +20,16 @@ import { join, resolve } from 'node:path';
 import { Scratchpad, readFacts, writeFact } from '@atlas/mcp-scratchpad';
 import { synthesize } from '@atlas/mcp-synthesizer';
 import { Proxy, parseHar, summarizeHar, type Spawner } from '@atlas/mcp-traffic-sniffer';
+import { emitMcpServer, emitOpenApi, emitTestSuite } from '@atlas/generators';
+import { parse as parseYaml } from 'yaml';
 
 function main(): void {
   smokeScratchpad();
   smokeTrafficSniffer();
   smokeSynthesizer();
+  smokeGenerators();
   smokeAgentValidator();
-  process.stdout.write('atlas smoke OK (Day 4: scratchpad + traffic-sniffer + synthesizer + agent validator)\n');
+  process.stdout.write('atlas smoke OK (Day 5: scratchpad + traffic-sniffer + synthesizer + generators + agent validator)\n');
 }
 
 function smokeScratchpad(): void {
@@ -163,6 +166,76 @@ function smokeSynthesizer(): void {
     // Idempotency check.
     const second = synthesize(scratchpad, 'synth-smoke');
     assert.equal(second.merged_count, 2, 'expected idempotent re-synthesis');
+  } finally {
+    scratchpad.close();
+    rmSync(tmp, { recursive: true, force: true });
+  }
+}
+
+function smokeGenerators(): void {
+  const tmp = mkdtempSync(join(tmpdir(), 'atlas-smoke-gen-'));
+  const scratchpad = new Scratchpad(join(tmp, 'smoke.sqlite'));
+  try {
+    scratchpad.migrate();
+
+    // Build a tiny merged_facts set directly so the generators have something
+    // to consume without going through the synthesizer (which is exercised
+    // in its own smoke segment above).
+    scratchpad.insertMergedFact({
+      run_id: 'gen-smoke',
+      fact_type: 'route',
+      content: { method: 'POST', path: '/ve/invoice', controller: 'InvoiceController@submit' },
+      resolution: 'unanimous',
+      source_fact_ids: [1, 2],
+      winning_source: 'traffic-sniffer',
+      confidence: 'high',
+    });
+    scratchpad.insertMergedFact({
+      run_id: 'gen-smoke',
+      fact_type: 'field_definition',
+      content: { name: 'amount', type: 'decimal', required: true },
+      resolution: 'priority',
+      source_fact_ids: [3, 4],
+      winning_source: 'traffic-sniffer',
+      confidence: 'high',
+    });
+    scratchpad.insertMergedFact({
+      run_id: 'gen-smoke',
+      fact_type: 'http_request',
+      content: { scenario_id: 's1', method: 'POST', url: 'http://localhost:8080/ve/invoice' },
+      resolution: 'unanimous',
+      source_fact_ids: [5],
+      winning_source: 'traffic-sniffer',
+      confidence: 'high',
+    });
+    scratchpad.insertMergedFact({
+      run_id: 'gen-smoke',
+      fact_type: 'http_response',
+      content: { scenario_id: 's1', status: 302 },
+      resolution: 'unanimous',
+      source_fact_ids: [6],
+      winning_source: 'traffic-sniffer',
+      confidence: 'high',
+    });
+
+    const merged = scratchpad.selectMergedFacts({ run_id: 'gen-smoke' });
+    assert.equal(merged.length, 4);
+
+    const openapi = emitOpenApi(merged, { runId: 'gen-smoke' });
+    assert.ok(openapi.path_count >= 1, 'expected ≥ 1 OpenAPI path');
+    const parsed = parseYaml(openapi.yaml) as { openapi: string; paths: Record<string, unknown> };
+    assert.equal(parsed.openapi, '3.1.0');
+    assert.ok(parsed.paths['/ve/invoice'], 'expected /ve/invoice path');
+
+    const mcpDir = join(tmp, 'mcp-out');
+    const mcpResult = emitMcpServer(merged, { runId: 'gen-smoke', outDir: mcpDir });
+    assert.equal(mcpResult.tool_count, 1);
+    assert.ok(mcpResult.files_written.includes('src/index.ts'));
+
+    const testsDir = join(tmp, 'tests-out');
+    const testsResult = emitTestSuite(merged, { runId: 'gen-smoke', outDir: testsDir });
+    assert.equal(testsResult.scenario_count, 1);
+    assert.ok(testsResult.files_written.includes('tests/replay.test.ts'));
   } finally {
     scratchpad.close();
     rmSync(tmp, { recursive: true, force: true });

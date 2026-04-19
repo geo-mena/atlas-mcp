@@ -4,6 +4,7 @@ description: Reverse-engineer a legacy target into deployable OpenAPI + MCP + fi
 allowed-tools:
   - mcp__atlas-scratchpad__*
   - mcp__atlas-synthesizer__*
+  - mcp__atlas-generators__*
   - mcp__atlas-fidelity-auditor__*
   - mcp__atlas-traffic-sniffer__*
   - Agent
@@ -88,15 +89,17 @@ If any source is below threshold, re-dispatch that subagent with a stricter `sco
 2. If `unresolved_count > 0`, call `mcp__atlas-synthesizer__conflicts({ run_id })` and write a human-review report at `.atlas/runs/<run_id>/conflicts.md` listing each unresolved key, the conflicting source fact ids, and the candidate contents.
 3. If `unresolved_count > 0` AND the operator did not pass `--ignore-conflicts`, halt the run with a clear summary. The Generators stage (Phase 5) requires a clean merge.
 
-## Phase 5 — Generators (Day 5+)
+## Phase 5 — Generators
 
-Not implemented yet. When the synthesis produces a clean merged_facts set, the Generators stage will sequentially invoke:
+Sequentially invoke the three generator tools against the cleaned merged_facts set. Each writes deterministic output under `.atlas/runs/<run_id>/artifacts/`. Each tool is independent — failures are reported but do not block the others, since the auditor (Phase 6) runs against whatever was emitted.
 
-- `emit-openapi` — OpenAPI 3.1 spec at `artifacts/openapi.yaml`
-- `emit-mcp-server` — TypeScript MCP scaffold at `artifacts/mcp-server/`
-- `emit-test-suite` — Vitest + nock cassettes at `artifacts/tests/`
+1. `mcp__atlas-generators__emit_openapi({ run_id })` → writes `artifacts/openapi.yaml`. Returns `{ path_count, schema_count, written_to }`. Spec carries `x-atlas-evidence` extensions on every operation and schema, pointing back at the source fact ids.
+2. `mcp__atlas-generators__emit_mcp_server({ run_id })` → writes `artifacts/mcp-server/` (package.json, tsconfig.json, README.md, src/index.ts). Returns `{ tool_count, files_written }`. The generated server reads `ATLAS_UPSTREAM_BASE_URL` to route requests to the legacy.
+3. `mcp__atlas-generators__emit_test_suite({ run_id })` → writes `artifacts/tests/` (package.json, vitest.config.ts, tests/replay.test.ts). Returns `{ scenario_count, files_written }`. One vitest case per `http_request`/`http_response` scenario pair captured by Traffic Sniffer.
 
-For Day 4 stop here and report the merged_facts summary to the operator.
+If `path_count === 0` OR `tool_count === 0`, the run did not yield enough discovery to be deployable; surface that to the operator and halt before Phase 6.
+
+## Phase 6 — Audit (Day 6+)
 
 ## Phase 6 — Audit (Day 6+)
 
@@ -104,9 +107,9 @@ Not implemented yet. Will invoke `mcp__atlas-fidelity-auditor__audit({ run_id })
 
 ## Exit conditions
 
-- **PASS** (Day 4 scope) — `unresolved_count === 0` and per-source thresholds met. Synthesis report surfaced to operator.
-- **HUMAN-REVIEW** — `unresolved_count > 0`. Run directory retains all artifacts; `conflicts.md` lists what to resolve.
-- **FAIL** — A source-agent subagent returned an error envelope; per-source threshold cannot be reached after one re-dispatch attempt. Run directory retained for diagnostics; operator decides whether to retry or abort.
+- **PASS** (Day 5 scope) — `unresolved_count === 0`, per-source thresholds met, all three generators emitted non-empty artifacts. Synthesis + generation report surfaced to operator.
+- **HUMAN-REVIEW** — `unresolved_count > 0`. Run directory retains source facts + (any) merged_facts; `conflicts.md` lists what to resolve. Generators are NOT invoked.
+- **FAIL** — A source-agent subagent returned an error envelope; per-source threshold cannot be reached after one re-dispatch attempt; OR a generator exited with `WRITE_FAILED` / `NO_MERGED_FACTS`. Run directory retained for diagnostics; operator decides whether to retry or abort.
 
 ## Don't
 

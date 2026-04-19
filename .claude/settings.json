@@ -8,7 +8,7 @@
     },
     "atlas-synthesizer": {
       "command": "node",
-      "args": ["./packages/mcp-synthesizer/dist/index.js"]
+      "args": ["./packages/mcp-synthesizer/dist/bin.js"]
     },
     "atlas-fidelity-auditor": {
       "command": "node",
@@ -17,6 +17,10 @@
     "atlas-traffic-sniffer": {
       "command": "node",
       "args": ["./packages/mcp-traffic-sniffer/dist/bin.js"]
+    },
+    "atlas-generators": {
+      "command": "node",
+      "args": ["./packages/generators/dist/bin.js"]
     }
   },
   "agents": {
@@ -51,7 +55,8 @@
         "Read",
         "Grep"
       ]
-    }
+    },
+    "_orchestrator_note": "The /atlas skill itself uses mcp__atlas-synthesizer__*, mcp__atlas-generators__*, mcp__atlas-fidelity-auditor__* and Agent. Tool list lives in .claude/skills/atlas.md frontmatter."
   },
   "hooks": {
     "_verify_field_name": "Confirm hook event name. Intended: fire before any Write/Edit that targets a path outside the active run directory (.atlas/runs/<run-id>/).",

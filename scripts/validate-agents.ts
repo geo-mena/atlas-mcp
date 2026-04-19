@@ -31,6 +31,7 @@ const REQUIRED_SKILL_SECTIONS = ['## Invocation'];
 const KNOWN_TOOL_PREFIXES = [
   'mcp__atlas-scratchpad__',
   'mcp__atlas-synthesizer__',
+  'mcp__atlas-generators__',
   'mcp__atlas-fidelity-auditor__',
   'mcp__atlas-traffic-sniffer__',
   'mcp__filesystem__',
