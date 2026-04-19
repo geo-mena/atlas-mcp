@@ -38,15 +38,15 @@ Compute a stable DOM hash (sha256 over the normalized snapshot text). If the has
 
 ```json
 {
-  "fact_type": "ui_screen",
-  "content": {
-    "url": "/ve/invoice",
-    "title": "New Invoice — Atlas Sandbox VE",
-    "dom_hash": "<sha256>",
-    "visible_landmarks": ["form#invoice", "button#submit", "select#customer_id"]
-  },
-  "evidence_uri": "snapshot:///<run_id>/screens/<dom_hash>.txt",
-  "confidence": "high"
+    "fact_type": "ui_screen",
+    "content": {
+        "url": "/ve/invoice",
+        "title": "New Invoice — Atlas Sandbox VE",
+        "dom_hash": "<sha256>",
+        "visible_landmarks": ["form#invoice", "button#submit", "select#customer_id"]
+    },
+    "evidence_uri": "snapshot:///<run_id>/screens/<dom_hash>.txt",
+    "confidence": "high"
 }
 ```
 
@@ -56,17 +56,17 @@ For each form, link, and button visible in the snapshot, emit one fact:
 
 ```json
 {
-  "fact_type": "ui_field",
-  "content": {
-    "screen": "/ve/invoice",
-    "name": "customer_id",
-    "label": "Customer",
-    "input_type": "select",
-    "required": true,
-    "options_count": 5
-  },
-  "evidence_uri": "snapshot:///<run_id>/screens/<dom_hash>.txt#customer_id",
-  "confidence": "high"
+    "fact_type": "ui_field",
+    "content": {
+        "screen": "/ve/invoice",
+        "name": "customer_id",
+        "label": "Customer",
+        "input_type": "select",
+        "required": true,
+        "options_count": 5
+    },
+    "evidence_uri": "snapshot:///<run_id>/screens/<dom_hash>.txt#customer_id",
+    "confidence": "high"
 }
 ```
 
@@ -80,16 +80,16 @@ For each error response (HTTP 4xx, inline error message, JS validation popup), e
 
 ```json
 {
-  "fact_type": "ui_validation",
-  "content": {
-    "screen": "/ve/invoice",
-    "field": "customer_id",
-    "trigger": "submit empty",
-    "error_message": "Customer is required",
-    "http_status": 422
-  },
-  "evidence_uri": "snapshot:///<run_id>/screens/<dom_hash>.txt#error",
-  "confidence": "high"
+    "fact_type": "ui_validation",
+    "content": {
+        "screen": "/ve/invoice",
+        "field": "customer_id",
+        "trigger": "submit empty",
+        "error_message": "Customer is required",
+        "http_status": 422
+    },
+    "evidence_uri": "snapshot:///<run_id>/screens/<dom_hash>.txt#error",
+    "confidence": "high"
 }
 ```
 
@@ -99,16 +99,16 @@ After each form submission or link click, record the transition:
 
 ```json
 {
-  "fact_type": "ui_transition",
-  "content": {
-    "from": "/ve/invoice",
-    "to": "/ve/invoice/123",
-    "trigger": "submit valid form",
-    "method": "POST",
-    "http_status": 302
-  },
-  "evidence_uri": "snapshot:///<run_id>/screens/<from_hash>.txt → <to_hash>.txt",
-  "confidence": "high"
+    "fact_type": "ui_transition",
+    "content": {
+        "from": "/ve/invoice",
+        "to": "/ve/invoice/123",
+        "trigger": "submit valid form",
+        "method": "POST",
+        "http_status": 302
+    },
+    "evidence_uri": "snapshot:///<run_id>/screens/<from_hash>.txt → <to_hash>.txt",
+    "confidence": "high"
 }
 ```
 
@@ -124,11 +124,11 @@ Exit when ANY of:
 
 ## Confidence calibration
 
-| Confidence | When to use |
-| --- | --- |
-| `high` | Element visible in the snapshot, label readable, behavior reproducible across two visits |
-| `medium` | Element visible but behavior depends on session state (e.g. cart items) |
-| `low` | Element only appears under specific unknown conditions, OR identified via vision (screenshot) only because the snapshot did not surface it |
+| Confidence | When to use                                                                                                                                |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `high`     | Element visible in the snapshot, label readable, behavior reproducible across two visits                                                   |
+| `medium`   | Element visible but behavior depends on session state (e.g. cart items)                                                                    |
+| `low`      | Element only appears under specific unknown conditions, OR identified via vision (screenshot) only because the snapshot did not surface it |
 
 ## Cross-agent invariants
 

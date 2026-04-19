@@ -40,21 +40,21 @@ tools: mcp__atlas-scratchpad__*, mcp__atlas-synthesizer__*, mcp__atlas-generator
 1. Generate `run_id` of the form `atlas-YYYYMMDD-HHMMSS-<random4>` using the current UTC timestamp.
 2. Create the run directory at `.atlas/runs/<run_id>/`.
 3. Set environment so MCPs share the scratchpad path:
-   - `ATLAS_RUN_ID=<run_id>`
-   - `ATLAS_SCRATCHPAD_PATH=.atlas/runs/<run_id>/scratchpad.sqlite`
-   - `ATLAS_RUNS_ROOT=.atlas/runs`
+    - `ATLAS_RUN_ID=<run_id>`
+    - `ATLAS_SCRATCHPAD_PATH=.atlas/runs/<run_id>/scratchpad.sqlite`
+    - `ATLAS_RUNS_ROOT=.atlas/runs`
 4. Call `mcp__atlas-scratchpad__migrate` to ensure schema is in place. This is idempotent.
 
 ## Phase 2 — Dispatch source agents (parallel)
 
 Use the `Agent` tool to invoke the four source-agent subagents IN PARALLEL. Per-agent budgets and tool surfaces are declared in their respective `.claude/agents/*.md` files.
 
-| Subagent | Inputs | Token target | Wall-clock | Tool-call cap |
-| --- | --- | --- | --- | --- |
-| `code-spelunker` | `run_id`, `target_path`, `scope_hint?` | 200K | 30 min | 500 |
-| `ui-explorer` | `run_id`, `target_url`, `entry_path?`, `auth_artifact?` | 400K | 45 min | 200 |
-| `traffic-sniffer` | `run_id`, `correlation_with: ["ui-explorer", "manual"]` | 100K | 30 min | n/a |
-| `doc-harvester` | `run_id`, `corpus_path`, `external_search_terms?` | 150K | 20 min | 100 |
+| Subagent          | Inputs                                                  | Token target | Wall-clock | Tool-call cap |
+| ----------------- | ------------------------------------------------------- | ------------ | ---------- | ------------- |
+| `code-spelunker`  | `run_id`, `target_path`, `scope_hint?`                  | 200K         | 30 min     | 500           |
+| `ui-explorer`     | `run_id`, `target_url`, `entry_path?`, `auth_artifact?` | 400K         | 45 min     | 200           |
+| `traffic-sniffer` | `run_id`, `correlation_with: ["ui-explorer", "manual"]` | 100K         | 30 min     | n/a           |
+| `doc-harvester`   | `run_id`, `corpus_path`, `external_search_terms?`       | 150K         | 20 min     | 100           |
 
 Dispatch all four with a single message containing four parallel `Agent` invocations. Wait for all to return.
 
@@ -64,13 +64,13 @@ Read fact counts per source via `mcp__atlas-scratchpad__read_facts({ run_id, sou
 
 Minimum thresholds (calibrated against the synthetic sandbox in `[[12 — Synthetic Sandbox]]`):
 
-| Source | Minimum facts |
-| --- | --- |
-| code-spelunker | 30 |
-| ui-explorer | 12 |
-| traffic-sniffer | 8 |
-| doc-harvester | 10 |
-| **total** | **≥ 60** |
+| Source          | Minimum facts |
+| --------------- | ------------- |
+| code-spelunker  | 30            |
+| ui-explorer     | 12            |
+| traffic-sniffer | 8             |
+| doc-harvester   | 10            |
+| **total**       | **≥ 60**      |
 
 If any source is below threshold, re-dispatch that subagent with a stricter `scope_hint` derived from the gap. Cap re-dispatches at 1 per source. If the gap persists, write a `partial_progress` summary to the run directory and surface the gap to the operator before proceeding to Phase 4.
 

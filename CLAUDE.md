@@ -17,15 +17,15 @@ The project is general-purpose. The Anthropic "Built with Opus 4.7" hackathon is
 
 - **Orchestrator**: `/atlas` skill in `.claude/skills/atlas.md`. The orchestrator role is filled by Claude Code itself executing this skill — there is no Atlas process supervising other Atlas processes.
 - **Source agents** (4 Claude Code subagents in `.claude/agents/`):
-  - `code-spelunker.md` — reads PHP source via `tree-sitter-php` + Filesystem MCP
-  - `ui-explorer.md` — drives Playwright MCP (vision 3.75 MP / 98.5% UI acuity)
-  - `traffic-sniffer.md` — drives `mcp-traffic-sniffer`
-  - `doc-harvester.md` — reads pre-exported corpus via Filesystem MCP + Exa MCP
+    - `code-spelunker.md` — reads PHP source via `tree-sitter-php` + Filesystem MCP
+    - `ui-explorer.md` — drives Playwright MCP (vision 3.75 MP / 98.5% UI acuity)
+    - `traffic-sniffer.md` — drives `mcp-traffic-sniffer`
+    - `doc-harvester.md` — reads pre-exported corpus via Filesystem MCP + Exa MCP
 - **Atlas-shipped MCP servers** (TypeScript, in `packages/`):
-  - `mcp-scratchpad` — SQLite via `better-sqlite3`, Postgres-ready schema
-  - `mcp-synthesizer` — deterministic chained-plan conflict resolution (no LLM calls)
-  - `mcp-fidelity-auditor` — deterministic byte-level diff with `microdiff` / `xml-c14n` / `xml-crypto` / `parse5` / `pdf-parse`
-  - `mcp-traffic-sniffer` — Playwright Node SDK + mitmproxy subprocess
+    - `mcp-scratchpad` — SQLite via `better-sqlite3`, Postgres-ready schema
+    - `mcp-synthesizer` — deterministic chained-plan conflict resolution (no LLM calls)
+    - `mcp-fidelity-auditor` — deterministic byte-level diff with `microdiff` / `xml-c14n` / `xml-crypto` / `parse5` / `pdf-parse`
+    - `mcp-traffic-sniffer` — Playwright Node SDK + mitmproxy subprocess
 - **External MCPs consumed**: official Playwright MCP, Filesystem MCP, Exa MCP.
 - **Generators** (TS modules in plugin code, not MCPs): `emit-openapi`, `emit-mcp-server`, `emit-test-suite`.
 - **Hook**: `.claude/hooks/pre-promote.ts` (with `.sh` shim). Reads the Fidelity Auditor verdict and exits non-zero on FAIL — gates artifact promotion fail-closed.
@@ -48,22 +48,22 @@ DHL eBilling reverse-engineering. Reference Jira: `CRA10-27064` (Venezuela / SEN
 
 `/Users/geomena/Documents/obsidian/tofi/Atlas/`
 
-| Note | Content |
-|---|---|
-| `00 — MOC.md` | Index, vision, closed decisions, principles |
-| `01 — Research Findings.md` | Opus 4.7 capabilities, MCP ecosystem, competition |
-| `02 — Problem & Validation.md` | DHL pain quantified, generalization beyond DHL |
-| `03 — MVP Scope.md` | Three deliverables, scope IN/OUT, success criteria |
-| `04 — Architecture.md` | Component diagram, scratchpad schema, contracts |
-| `05 — Source Agents.md` | Per-subagent definitions and contracts |
-| `06 — Fidelity Auditor.md` | Audit loop, verdict classification, diff strategy |
-| `07 — Risk Matrix.md` | Technical / demo / legal / strategic risks |
-| `08 — Open Questions.md` | Decisions pending external inputs (non-blocking) |
-| `09 — Build Plan.md` | 7-day execution plan with daily exit criteria |
-| `10 — Repo Scaffolding.md` | This repo's layout, tooling, CI |
-| `11 — Demo Script.md` | 3-minute pitch with timing and fallbacks |
-| `12 — Synthetic Sandbox.md` | PHP eBilling sandbox spec (target of demo) |
-| `Architecture.canvas` | Visual model |
+| Note                           | Content                                            |
+| ------------------------------ | -------------------------------------------------- |
+| `00 — MOC.md`                  | Index, vision, closed decisions, principles        |
+| `01 — Research Findings.md`    | Opus 4.7 capabilities, MCP ecosystem, competition  |
+| `02 — Problem & Validation.md` | DHL pain quantified, generalization beyond DHL     |
+| `03 — MVP Scope.md`            | Three deliverables, scope IN/OUT, success criteria |
+| `04 — Architecture.md`         | Component diagram, scratchpad schema, contracts    |
+| `05 — Source Agents.md`        | Per-subagent definitions and contracts             |
+| `06 — Fidelity Auditor.md`     | Audit loop, verdict classification, diff strategy  |
+| `07 — Risk Matrix.md`          | Technical / demo / legal / strategic risks         |
+| `08 — Open Questions.md`       | Decisions pending external inputs (non-blocking)   |
+| `09 — Build Plan.md`           | 7-day execution plan with daily exit criteria      |
+| `10 — Repo Scaffolding.md`     | This repo's layout, tooling, CI                    |
+| `11 — Demo Script.md`          | 3-minute pitch with timing and fallbacks           |
+| `12 — Synthetic Sandbox.md`    | PHP eBilling sandbox spec (target of demo)         |
+| `Architecture.canvas`          | Visual model                                       |
 
 ## Conventions
 
@@ -75,52 +75,59 @@ DHL eBilling reverse-engineering. Reference Jira: `CRA10-27064` (Venezuela / SEN
 ## Clean Code Principles
 
 ### Naming
+
 - Names that reveal intent: `daysSinceLastTransaction` instead of `d`.
 - Follow language conventions: camelCase, snake_case, PascalCase as appropriate.
 - No ambiguous abbreviations or unnecessary prefixes.
 
 ### Functions
+
 - Small, single-purpose. If you need "and" to describe what it does, split it.
 - Short functions as a guideline, not a rigid rule. Prioritize readability over arbitrary metrics.
 - Parameters: ideally ≤3. If more are needed, use an object/DTO.
 
 ### Structure
+
 - DRY: duplicated code is multiplied technical debt. Extract to shared functions, utilities, or modules.
 - Principle of least surprise: code should do exactly what its name suggests.
 - Early return to reduce nesting.
 
 ### Error Handling
+
 - Explicit handling: never silently ignore exceptions.
 - Specific errors over generic ones. Descriptive messages that aid debugging.
 - Validate inputs at system boundaries (controllers, handlers, APIs).
 
 ### Comments
+
 - Only when they add value: explain the WHY, never the WHAT.
 - If you need many comments, the code needs refactoring.
 - TODO/FIXME with context: `// TODO(geovanni): migrate to new API when v1 is deprecated`
 
 ## Legacy Code
+
 - Prioritize consistency with surrounding code over isolated "best practices".
 - Propose refactors as a separate step, never mix them with the main task.
 
 ## When Delivering Code
+
 - Brief summary of changes and reasoning behind non-obvious decisions.
 - If there are trade-offs, mention them.
 - If multiple files were touched, list which ones and why.
 
 ## Commands
 
-| Command | Purpose |
-|---|---|
-| `pnpm install` | Install workspace deps |
-| `pnpm build` | Build all packages with tsup |
-| `pnpm test` | Vitest workspace mode |
-| `pnpm lint` | ESLint + Prettier check |
-| `pnpm typecheck` | `tsc --noEmit` across the workspace |
-| `pnpm smoke` | Deterministic end-to-end sanity (no LLM, no Claude Code) |
-| `pnpm sandbox:up` | Start synthetic PHP eBilling sandbox via Docker Compose |
-| `pnpm sandbox:seed` | Load deterministic seed data into the sandbox |
-| `pnpm sandbox:reset` | Drop volumes and re-seed |
+| Command                         | Purpose                                                      |
+| ------------------------------- | ------------------------------------------------------------ |
+| `pnpm install`                  | Install workspace deps                                       |
+| `pnpm build`                    | Build all packages with tsup                                 |
+| `pnpm test`                     | Vitest workspace mode                                        |
+| `pnpm lint`                     | ESLint + Prettier check                                      |
+| `pnpm typecheck`                | `tsc --noEmit` across the workspace                          |
+| `pnpm smoke`                    | Deterministic end-to-end sanity (no LLM, no Claude Code)     |
+| `pnpm sandbox:up`               | Start synthetic PHP eBilling sandbox via Docker Compose      |
+| `pnpm sandbox:seed`             | Load deterministic seed data into the sandbox                |
+| `pnpm sandbox:reset`            | Drop volumes and re-seed                                     |
 | `bash scripts/dev-bootstrap.sh` | Full local bootstrap (sandbox + scratchpad + plugin install) |
 
 ## Don't

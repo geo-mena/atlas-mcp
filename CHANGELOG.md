@@ -57,11 +57,11 @@ First end-to-end working version. Six MCP / generator packages, deterministic ch
 ### Added — `@atlas/mcp-fidelity-auditor`
 
 - Pure layers (testable without DB or HTTP):
-  - `normalize` — per-content-type: JSON sort-keys + scrub-paths + regex masks; XML whitespace collapse + element scrub; HTML parse5 canonical + collapse; text trim + EOL normalize. PDF / binary identity (deferred).
-  - `diff` — `microdiff` for JSON; equality post-normalize for XML / HTML / text. Status mismatch surfaces as a single change on the `status` path.
-  - `classify` — DiffResult → Verdict. All-equal → PASS. All changes inside `noise_allowlist` → PASS-WITH-NOISE. Mixed allowlist coverage → HUMAN-REVIEW. Anything else → FAIL. Text-only diffs classify by `text_noise_max` chars.
-  - `audit` — orchestrates per scenario; status mismatch is unconditional FAIL; aggregates run-level verdict via `aggregateRunVerdict` with default threshold 0.9.
-  - `report` — emits `audit/{results.jsonl, report.md, coverage.md, failed/}`. The `Run verdict: X` line in `report.md` is load-bearing for the `pre-promote` hook.
+    - `normalize` — per-content-type: JSON sort-keys + scrub-paths + regex masks; XML whitespace collapse + element scrub; HTML parse5 canonical + collapse; text trim + EOL normalize. PDF / binary identity (deferred).
+    - `diff` — `microdiff` for JSON; equality post-normalize for XML / HTML / text. Status mismatch surfaces as a single change on the `status` path.
+    - `classify` — DiffResult → Verdict. All-equal → PASS. All changes inside `noise_allowlist` → PASS-WITH-NOISE. Mixed allowlist coverage → HUMAN-REVIEW. Anything else → FAIL. Text-only diffs classify by `text_noise_max` chars.
+    - `audit` — orchestrates per scenario; status mismatch is unconditional FAIL; aggregates run-level verdict via `aggregateRunVerdict` with default threshold 0.9.
+    - `report` — emits `audit/{results.jsonl, report.md, coverage.md, failed/}`. The `Run verdict: X` line in `report.md` is load-bearing for the `pre-promote` hook.
 - MCP tool: `audit({ run_id, audit_dir, scenarios, normalization?, noise_allowlist?, text_noise_max?, pass_threshold? })`.
 - 30 vitest tests (8 normalize + 5 diff + 9 classify + 8 audit/report).
 

@@ -99,18 +99,18 @@ pnpm sandbox:reset     # drop volumes + reseed
 
 ## Project layout
 
-| Path | Purpose |
-|---|---|
-| [`.claude/`](.claude/) | Plugin bundle (skills, subagents, MCP wiring, hooks) |
-| [`packages/mcp-scratchpad/`](packages/mcp-scratchpad/) | SQLite fact store with cross-agent invariant validation |
-| [`packages/mcp-synthesizer/`](packages/mcp-synthesizer/) | Deterministic chained-plan conflict resolution |
-| [`packages/mcp-traffic-sniffer/`](packages/mcp-traffic-sniffer/) | mitmdump subprocess + Playwright wrapper |
-| [`packages/mcp-fidelity-auditor/`](packages/mcp-fidelity-auditor/) | Byte-level diff with per-content-type normalization |
-| [`packages/generators/`](packages/generators/) | OpenAPI / MCP scaffold / Vitest test suite emitters |
-| [`packages/shared/`](packages/shared/) | Cross-package types and zod schemas |
-| [`apps/sandbox/`](apps/sandbox/) | Synthetic PHP eBilling demo target |
-| [`scripts/`](scripts/) | Bootstrap, smoke, e2e |
-| [`docs/`](docs/) | Repo-local docs |
+| Path                                                               | Purpose                                                 |
+| ------------------------------------------------------------------ | ------------------------------------------------------- |
+| [`.claude/`](.claude/)                                             | Plugin bundle (skills, subagents, MCP wiring, hooks)    |
+| [`packages/mcp-scratchpad/`](packages/mcp-scratchpad/)             | SQLite fact store with cross-agent invariant validation |
+| [`packages/mcp-synthesizer/`](packages/mcp-synthesizer/)           | Deterministic chained-plan conflict resolution          |
+| [`packages/mcp-traffic-sniffer/`](packages/mcp-traffic-sniffer/)   | mitmdump subprocess + Playwright wrapper                |
+| [`packages/mcp-fidelity-auditor/`](packages/mcp-fidelity-auditor/) | Byte-level diff with per-content-type normalization     |
+| [`packages/generators/`](packages/generators/)                     | OpenAPI / MCP scaffold / Vitest test suite emitters     |
+| [`packages/shared/`](packages/shared/)                             | Cross-package types and zod schemas                     |
+| [`apps/sandbox/`](apps/sandbox/)                                   | Synthetic PHP eBilling demo target                      |
+| [`scripts/`](scripts/)                                             | Bootstrap, smoke, e2e                                   |
+| [`docs/`](docs/)                                                   | Repo-local docs                                         |
 
 ## Stack
 
@@ -120,16 +120,16 @@ Node 20+ · pnpm 9 workspace · TypeScript strict (`exactOptionalPropertyTypes`,
 
 Day 6 of 7 complete (per the `09 — Build Plan.md` in the design vault). Six MCP / generator packages, 86 unit tests passing, two deterministic smoke scripts (`pnpm smoke`, `pnpm e2e`), CI on every push.
 
-| Layer | Status |
-|---|---|
-| Plugin bundle (`.claude/skills`, `.claude/agents`, `.claude/hooks`) | ✅ shipped |
-| `mcp-scratchpad` | ✅ real |
-| `mcp-traffic-sniffer` | ✅ real (mitmproxy subprocess) |
-| `mcp-synthesizer` | ✅ real (deterministic chained plan) |
-| `@atlas/generators` | ✅ real (OpenAPI + MCP scaffold + tests) |
-| `mcp-fidelity-auditor` | ✅ real (per-content-type normalize + diff + classify) |
-| `pre-promote` hook | ✅ wired (parses `Run verdict:` line) |
-| Synthetic PHP sandbox | ✅ end-to-end against Docker Compose |
+| Layer                                                               | Status                                                 |
+| ------------------------------------------------------------------- | ------------------------------------------------------ |
+| Plugin bundle (`.claude/skills`, `.claude/agents`, `.claude/hooks`) | ✅ shipped                                             |
+| `mcp-scratchpad`                                                    | ✅ real                                                |
+| `mcp-traffic-sniffer`                                               | ✅ real (mitmproxy subprocess)                         |
+| `mcp-synthesizer`                                                   | ✅ real (deterministic chained plan)                   |
+| `@atlas/generators`                                                 | ✅ real (OpenAPI + MCP scaffold + tests)               |
+| `mcp-fidelity-auditor`                                              | ✅ real (per-content-type normalize + diff + classify) |
+| `pre-promote` hook                                                  | ✅ wired (parses `Run verdict:` line)                  |
+| Synthetic PHP sandbox                                               | ✅ end-to-end against Docker Compose                   |
 
 ## Design
 

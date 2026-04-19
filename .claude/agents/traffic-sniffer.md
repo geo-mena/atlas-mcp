@@ -43,32 +43,32 @@ Call `mcp__atlas-traffic-sniffer__dump_har` to read the HAR summary (`entry_coun
 
 ```json
 {
-  "fact_type": "http_request",
-  "content": {
-    "scenario_id": "scn-001",
-    "method": "POST",
-    "url": "http://seniat-mock:3001/seniat-mock/authorize",
-    "headers": { "content-type": "application/xml" },
-    "body_excerpt": "<AuthorizationRequest xmlns=\"urn:atlas:sandbox:seniat:v1\">…",
-    "body_sha256": "<sha256>"
-  },
-  "evidence_uri": "har:///<run_id>/golden.har#entry-0",
-  "confidence": "high"
+    "fact_type": "http_request",
+    "content": {
+        "scenario_id": "scn-001",
+        "method": "POST",
+        "url": "http://seniat-mock:3001/seniat-mock/authorize",
+        "headers": { "content-type": "application/xml" },
+        "body_excerpt": "<AuthorizationRequest xmlns=\"urn:atlas:sandbox:seniat:v1\">…",
+        "body_sha256": "<sha256>"
+    },
+    "evidence_uri": "har:///<run_id>/golden.har#entry-0",
+    "confidence": "high"
 }
 ```
 
 ```json
 {
-  "fact_type": "http_response",
-  "content": {
-    "scenario_id": "scn-001",
-    "status": 200,
-    "headers": { "content-type": "application/xml" },
-    "body_excerpt": "<envelope xmlns=\"urn:atlas:sandbox:seniat:v1\"><authorization>…",
-    "body_sha256": "<sha256>"
-  },
-  "evidence_uri": "har:///<run_id>/golden.har#entry-0",
-  "confidence": "high"
+    "fact_type": "http_response",
+    "content": {
+        "scenario_id": "scn-001",
+        "status": 200,
+        "headers": { "content-type": "application/xml" },
+        "body_excerpt": "<envelope xmlns=\"urn:atlas:sandbox:seniat:v1\"><authorization>…",
+        "body_sha256": "<sha256>"
+    },
+    "evidence_uri": "har:///<run_id>/golden.har#entry-0",
+    "confidence": "high"
 }
 ```
 
@@ -84,10 +84,10 @@ When you see `Set-Cookie`, `Authorization: Bearer …`, or session-token respons
 
 ```json
 {
-  "fact_type": "auth_artifact",
-  "content": { "type": "cookie", "name": "PHPSESSID", "scope": "/ve/" },
-  "evidence_uri": "har:///<run_id>/golden.har#entry-3",
-  "confidence": "high"
+    "fact_type": "auth_artifact",
+    "content": { "type": "cookie", "name": "PHPSESSID", "scope": "/ve/" },
+    "evidence_uri": "har:///<run_id>/golden.har#entry-3",
+    "confidence": "high"
 }
 ```
 

@@ -41,14 +41,14 @@ Emit one fact per rule:
 
 ```json
 {
-  "fact_type": "business_rule",
-  "content": {
-    "statement": "Control numbers must be unique per taxpayer per fiscal period",
-    "scope": "invoice-issuance",
-    "source_doc": "ve-control-number-policy.md"
-  },
-  "evidence_uri": "file://corpus/confluence/ve-control-number-policy.md#L9-L11",
-  "confidence": "high"
+    "fact_type": "business_rule",
+    "content": {
+        "statement": "Control numbers must be unique per taxpayer per fiscal period",
+        "scope": "invoice-issuance",
+        "source_doc": "ve-control-number-policy.md"
+    },
+    "evidence_uri": "file://corpus/confluence/ve-control-number-policy.md#L9-L11",
+    "confidence": "high"
 }
 ```
 
@@ -64,15 +64,15 @@ A compliance constraint is a regulator-imposed requirement (vs. an internal poli
 
 ```json
 {
-  "fact_type": "compliance_constraint",
-  "content": {
-    "regulator": "SENIAT-shaped",
-    "requirement": "Signed XML envelope with fiscal sequence",
-    "applies_to": "invoice authorization",
-    "source_doc": "ve-ebilling-overview.md"
-  },
-  "evidence_uri": "file://corpus/confluence/ve-ebilling-overview.md#L34-L37",
-  "confidence": "high"
+    "fact_type": "compliance_constraint",
+    "content": {
+        "regulator": "SENIAT-shaped",
+        "requirement": "Signed XML envelope with fiscal sequence",
+        "applies_to": "invoice authorization",
+        "source_doc": "ve-ebilling-overview.md"
+    },
+    "evidence_uri": "file://corpus/confluence/ve-ebilling-overview.md#L34-L37",
+    "confidence": "high"
 }
 ```
 
@@ -82,16 +82,16 @@ A field definition is a named field with format / range / enumeration. Found in 
 
 ```json
 {
-  "fact_type": "field_definition",
-  "content": {
-    "name": "fiscal_sequence",
-    "type": "string",
-    "format": "monotonic-per-taxpayer",
-    "required": true,
-    "source_doc": "ve-ebilling-overview.md"
-  },
-  "evidence_uri": "file://corpus/confluence/ve-ebilling-overview.md#L45-L52",
-  "confidence": "high"
+    "fact_type": "field_definition",
+    "content": {
+        "name": "fiscal_sequence",
+        "type": "string",
+        "format": "monotonic-per-taxpayer",
+        "required": true,
+        "source_doc": "ve-ebilling-overview.md"
+    },
+    "evidence_uri": "file://corpus/confluence/ve-ebilling-overview.md#L45-L52",
+    "confidence": "high"
 }
 ```
 
@@ -118,11 +118,11 @@ Cap: at most 5 Exa queries per `external_search_term`. Token budget below 30% re
 
 ## Confidence calibration
 
-| Confidence | When to use |
-| --- | --- |
-| `high` | Explicit normative statement in an internal corpus document (`MUST`, numbered AC, named regulation reference) |
-| `medium` | Descriptive statement that strongly implies a rule (`the invoice carries a control number assigned by the regulator`) |
-| `low` | Inferred from external regulator docs without internal corroboration, OR paraphrased from a tangential mention |
+| Confidence | When to use                                                                                                           |
+| ---------- | --------------------------------------------------------------------------------------------------------------------- |
+| `high`     | Explicit normative statement in an internal corpus document (`MUST`, numbered AC, named regulation reference)         |
+| `medium`   | Descriptive statement that strongly implies a rule (`the invoice carries a control number assigned by the regulator`) |
+| `low`      | Inferred from external regulator docs without internal corroboration, OR paraphrased from a tangential mention        |
 
 ## Cross-agent invariants
 

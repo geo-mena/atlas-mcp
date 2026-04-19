@@ -3,11 +3,11 @@ import type { Scratchpad } from '@atlas/mcp-scratchpad';
 import { synthesizeDrafts } from './policy.js';
 
 export interface SynthesisResult {
-  readonly run_id: string;
-  readonly source_fact_count: number;
-  readonly merged_count: number;
-  readonly resolutions: Readonly<Record<string, number>>;
-  readonly unresolved_count: number;
+    readonly run_id: string;
+    readonly source_fact_count: number;
+    readonly merged_count: number;
+    readonly resolutions: Readonly<Record<string, number>>;
+    readonly unresolved_count: number;
 }
 
 /**
@@ -19,26 +19,26 @@ export interface SynthesisResult {
  * of how many times it was invoked previously.
  */
 export function synthesize(scratchpad: Scratchpad, runId: string): SynthesisResult {
-  const facts = scratchpad.selectFacts({ run_id: runId });
-  const drafts = synthesizeDrafts(facts);
+    const facts = scratchpad.selectFacts({ run_id: runId });
+    const drafts = synthesizeDrafts(facts);
 
-  scratchpad.deleteMergedFacts(runId);
-  for (const draft of drafts) {
-    scratchpad.insertMergedFact(draft);
-  }
+    scratchpad.deleteMergedFacts(runId);
+    for (const draft of drafts) {
+        scratchpad.insertMergedFact(draft);
+    }
 
-  const resolutions: Record<string, number> = {};
-  let unresolved = 0;
-  for (const draft of drafts) {
-    resolutions[draft.resolution] = (resolutions[draft.resolution] ?? 0) + 1;
-    if (draft.resolution === 'unresolved') unresolved += 1;
-  }
+    const resolutions: Record<string, number> = {};
+    let unresolved = 0;
+    for (const draft of drafts) {
+        resolutions[draft.resolution] = (resolutions[draft.resolution] ?? 0) + 1;
+        if (draft.resolution === 'unresolved') unresolved += 1;
+    }
 
-  return {
-    run_id: runId,
-    source_fact_count: facts.length,
-    merged_count: drafts.length,
-    resolutions,
-    unresolved_count: unresolved,
-  };
+    return {
+        run_id: runId,
+        source_fact_count: facts.length,
+        merged_count: drafts.length,
+        resolutions,
+        unresolved_count: unresolved,
+    };
 }

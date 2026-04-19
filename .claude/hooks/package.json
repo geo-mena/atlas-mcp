@@ -1,7 +1,7 @@
 {
-  "name": "atlas-claude-hooks",
-  "version": "0.1.0-alpha.0",
-  "private": true,
-  "type": "module",
-  "_note": "This package.json is not part of the pnpm workspace. It exists so .ts hook files in this directory are treated as ECMAScript modules by Node and by the TypeScript language service (verbatimModuleSyntax)."
+    "name": "atlas-claude-hooks",
+    "version": "0.1.0-alpha.0",
+    "private": true,
+    "type": "module",
+    "_note": "This package.json is not part of the pnpm workspace. It exists so .ts hook files in this directory are treated as ECMAScript modules by Node and by the TypeScript language service (verbatimModuleSyntax)."
 }

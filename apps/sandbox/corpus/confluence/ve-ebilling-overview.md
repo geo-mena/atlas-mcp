@@ -21,12 +21,12 @@ An invoice transitions through the states **draft → authorized → rejected**.
 
 ## Required fields per line
 
-| Field | Type | Required | Notes |
-|---|---|---|---|
-| product_id | int | yes | Must reference an existing product |
-| quantity | int ≥ 1 | yes | |
-| unit_price | decimal | yes | Defaults to product's catalog price; operator may override |
-| tax_code | string | yes | Must be one of `IVA-G`, `IVA-R`, `IVA-A`, `EXEMPT` |
+| Field      | Type    | Required | Notes                                                      |
+| ---------- | ------- | -------- | ---------------------------------------------------------- |
+| product_id | int     | yes      | Must reference an existing product                         |
+| quantity   | int ≥ 1 | yes      |                                                            |
+| unit_price | decimal | yes      | Defaults to product's catalog price; operator may override |
+| tax_code   | string  | yes      | Must be one of `IVA-G`, `IVA-R`, `IVA-A`, `EXEMPT`         |
 
 ## Catalogs in scope
 

@@ -42,10 +42,14 @@ Each discovered route → `write_fact` with:
 
 ```json
 {
-  "fact_type": "route",
-  "content": { "method": "POST", "path": "/ve/invoice", "controller": "InvoiceController@submit" },
-  "evidence_uri": "file:///path/to/index.php#L23-L25",
-  "confidence": "high"
+    "fact_type": "route",
+    "content": {
+        "method": "POST",
+        "path": "/ve/invoice",
+        "controller": "InvoiceController@submit"
+    },
+    "evidence_uri": "file:///path/to/index.php#L23-L25",
+    "confidence": "high"
 }
 ```
 
@@ -60,15 +64,15 @@ For each controller class referenced by a route, parse with tree-sitter and extr
 
 ```json
 {
-  "fact_type": "controller_action",
-  "content": {
-    "class": "InvoiceController",
-    "method": "submit",
-    "params": ["customer_id", "product_id", "quantity", "currency"],
-    "validations": ["customer_id required", "quantity ≥ 1"]
-  },
-  "evidence_uri": "file:///path/to/Controllers/InvoiceController.php#L45-L120",
-  "confidence": "high"
+    "fact_type": "controller_action",
+    "content": {
+        "class": "InvoiceController",
+        "method": "submit",
+        "params": ["customer_id", "product_id", "quantity", "currency"],
+        "validations": ["customer_id required", "quantity ≥ 1"]
+    },
+    "evidence_uri": "file:///path/to/Controllers/InvoiceController.php#L45-L120",
+    "confidence": "high"
 }
 ```
 
@@ -82,15 +86,15 @@ Within each controller method, find PDO / mysqli / ORM calls:
 
 ```json
 {
-  "fact_type": "db_query",
-  "content": {
-    "controller": "InvoiceController@submit",
-    "operation": "INSERT",
-    "table": "invoices",
-    "columns": ["customer_id", "status", "currency", "total_amount"]
-  },
-  "evidence_uri": "file:///path/to/Controllers/InvoiceController.php#L78",
-  "confidence": "high"
+    "fact_type": "db_query",
+    "content": {
+        "controller": "InvoiceController@submit",
+        "operation": "INSERT",
+        "table": "invoices",
+        "columns": ["customer_id", "status", "currency", "total_amount"]
+    },
+    "evidence_uri": "file:///path/to/Controllers/InvoiceController.php#L78",
+    "confidence": "high"
 }
 ```
 
@@ -100,26 +104,26 @@ Find cURL invocations (`curl_init`, `curl_exec`), Guzzle clients (`$client->post
 
 ```json
 {
-  "fact_type": "external_call",
-  "content": {
-    "controller": "InvoiceController@submit",
-    "client": "curl",
-    "url_template": "${SENIAT_BASE_URL}/seniat-mock/authorize",
-    "method": "POST",
-    "content_type": "application/xml"
-  },
-  "evidence_uri": "file:///path/to/Services/SeniatClient.php#L98-L115",
-  "confidence": "high"
+    "fact_type": "external_call",
+    "content": {
+        "controller": "InvoiceController@submit",
+        "client": "curl",
+        "url_template": "${SENIAT_BASE_URL}/seniat-mock/authorize",
+        "method": "POST",
+        "content_type": "application/xml"
+    },
+    "evidence_uri": "file:///path/to/Services/SeniatClient.php#L98-L115",
+    "confidence": "high"
 }
 ```
 
 ## Confidence calibration
 
-| Confidence | When to use |
-| --- | --- |
-| `high` | Direct string literal match (route literal, query literal, URL literal) — no static interpretation needed |
-| `medium` | Variable interpolation that can be resolved at parse time (`${ENV_VAR}`, concatenation of two literals) |
-| `low` | Dynamic dispatch (variable function names, runtime-built URLs, includes from variables, magic methods) |
+| Confidence | When to use                                                                                               |
+| ---------- | --------------------------------------------------------------------------------------------------------- |
+| `high`     | Direct string literal match (route literal, query literal, URL literal) — no static interpretation needed |
+| `medium`   | Variable interpolation that can be resolved at parse time (`${ENV_VAR}`, concatenation of two literals)   |
+| `low`      | Dynamic dispatch (variable function names, runtime-built URLs, includes from variables, magic methods)    |
 
 ## Cross-agent invariants
 

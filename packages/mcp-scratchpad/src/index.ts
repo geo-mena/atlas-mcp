@@ -9,11 +9,11 @@ export { Scratchpad } from './db.js';
 export { buildServer } from './server.js';
 export { migrate, readFacts, writeFact, type WriteFactResult } from './tools.js';
 export type {
-  Fact,
-  FactInput,
-  FactFilter,
-  MergedFact,
-  MergedFactInput,
-  MergedFactFilter,
-  Resolution,
+    Fact,
+    FactInput,
+    FactFilter,
+    MergedFact,
+    MergedFactInput,
+    MergedFactFilter,
+    Resolution,
 } from '@atlas/shared';

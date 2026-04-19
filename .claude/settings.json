@@ -1,16 +1,16 @@
 {
-  "_note": "Project-scoped MCP servers live in .mcp.json at the project root, not here. Claude Code reads MCP servers only from .mcp.json (project scope) or ~/.claude.json (local/user scope). This file holds permissions and hooks that are project-scoped via .claude/settings.json.",
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/pre-promote.sh"
-          }
+    "_note": "Project-scoped MCP servers live in .mcp.json at the project root, not here. Claude Code reads MCP servers only from .mcp.json (project scope) or ~/.claude.json (local/user scope). This file holds permissions and hooks that are project-scoped via .claude/settings.json.",
+    "hooks": {
+        "PreToolUse": [
+            {
+                "matcher": "Write|Edit|MultiEdit",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/pre-promote.sh"
+                    }
+                ]
+            }
         ]
-      }
-    ]
-  }
+    }
 }
