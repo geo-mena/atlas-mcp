@@ -1,13 +1,7 @@
 ---
 name: code-spelunker
 description: Reads PHP source code via tree-sitter-php and the Filesystem MCP. Maps routes, controller actions, database access patterns, and external HTTP calls. Writes structured facts to the scratchpad.
-allowed-tools:
-  - mcp__atlas-scratchpad__*
-  - mcp__filesystem__*
-  - Read
-  - Glob
-  - Grep
-  - Bash(tree-sitter:*)
+tools: mcp__atlas-scratchpad__*, mcp__filesystem__*, Read, Glob, Grep, Bash(tree-sitter:*)
 ---
 
 # Code Spelunker — source-agent subagent

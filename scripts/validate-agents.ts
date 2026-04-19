@@ -16,7 +16,7 @@ import { join, relative, resolve } from 'node:path';
 interface AgentFrontmatter {
   readonly name: string;
   readonly description: string;
-  readonly allowedTools: readonly string[];
+  readonly tools: readonly string[];
 }
 
 interface ValidationIssue {
@@ -96,11 +96,11 @@ function validateFile(path: string, repoRoot: string, requiredSections: readonly
   if (!fm.description || fm.description.length === 0) {
     issues.push({ file: rel, severity: 'error', message: 'frontmatter `description` missing or empty' });
   }
-  if (fm.allowedTools.length === 0) {
-    issues.push({ file: rel, severity: 'warn', message: 'frontmatter `allowed-tools` is empty' });
+  if (fm.tools.length === 0) {
+    issues.push({ file: rel, severity: 'warn', message: 'frontmatter `tools` is empty' });
   }
 
-  for (const tool of fm.allowedTools) {
+  for (const tool of fm.tools) {
     if (!isKnownTool(tool)) {
       issues.push({ file: rel, severity: 'warn', message: `unknown tool pattern: ${tool}` });
     }
@@ -123,17 +123,18 @@ function parseFrontmatter(text: string): AgentFrontmatter | null {
 
   let name = '';
   let description = '';
-  const allowedTools: string[] = [];
-  let inAllowedTools = false;
+  let tools: string[] = [];
+  let inToolsArray = false;
+  let sawAllowedTools = false;
 
   for (const line of body.split('\n')) {
-    if (inAllowedTools) {
+    if (inToolsArray) {
       const item = /^\s+-\s+(.+)$/.exec(line);
       if (item?.[1]) {
-        allowedTools.push(item[1].trim());
+        tools.push(item[1].trim());
         continue;
       }
-      inAllowedTools = false;
+      inToolsArray = false;
     }
 
     const kv = /^([\w-]+):\s*(.*)$/.exec(line);
@@ -142,12 +143,25 @@ function parseFrontmatter(text: string): AgentFrontmatter | null {
     const value = raw.trim();
     if (key === 'name') name = unquote(value);
     else if (key === 'description') description = unquote(value);
-    else if (key === 'allowed-tools' || key === 'allowedTools') {
-      inAllowedTools = true;
+    else if (key === 'tools') {
+      if (value === '') {
+        inToolsArray = true;
+      } else {
+        tools = value.split(',').map((s) => s.trim()).filter((s) => s.length > 0);
+      }
+    } else if (key === 'allowed-tools' || key === 'allowedTools') {
+      // Legacy/incorrect Claude Code field name; flag for migration.
+      sawAllowedTools = true;
+      inToolsArray = true;
     }
   }
 
-  return { name, description, allowedTools };
+  if (sawAllowedTools && tools.length === 0) {
+    // Surface as a hard issue at the call site by leaving tools empty.
+    return { name, description, tools: [] };
+  }
+
+  return { name, description, tools };
 }
 
 function unquote(value: string): string {

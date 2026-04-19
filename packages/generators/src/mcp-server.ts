@@ -123,9 +123,15 @@ function renderPackageJson(name: string): string {
       bin: { [name]: './dist/index.js' },
       scripts: {
         build: 'tsup src/index.ts --format esm --dts --clean',
+        typecheck: 'tsc --noEmit',
       },
       dependencies: {
         '@modelcontextprotocol/sdk': '^1.29.0',
+      },
+      devDependencies: {
+        '@types/node': '^20.14.0',
+        tsup: '^8.5.1',
+        typescript: '^5.6.0',
       },
     },
     null,

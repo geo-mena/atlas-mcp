@@ -1,16 +1,7 @@
 ---
 name: atlas
 description: Reverse-engineer a legacy target into deployable OpenAPI + MCP + fidelity-test artifacts. Dispatches four discovery subagents in parallel, synthesizes their findings via deterministic policy, generates artifacts (Day 5+), and gates promotion on the Fidelity Auditor (Day 6+).
-allowed-tools:
-  - mcp__atlas-scratchpad__*
-  - mcp__atlas-synthesizer__*
-  - mcp__atlas-generators__*
-  - mcp__atlas-fidelity-auditor__*
-  - mcp__atlas-traffic-sniffer__*
-  - Agent
-  - Read
-  - Write
-  - Bash
+tools: mcp__atlas-scratchpad__*, mcp__atlas-synthesizer__*, mcp__atlas-generators__*, mcp__atlas-fidelity-auditor__*, mcp__atlas-traffic-sniffer__*, Agent, Read, Write, Bash
 ---
 
 # /atlas — Atlas orchestrator skill

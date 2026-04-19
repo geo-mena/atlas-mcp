@@ -1,9 +1,7 @@
 ---
 name: ui-explorer
 description: Drives the official Playwright MCP against a running legacy UI. Captures screens, fields, validations, and transitions. Uses Opus 4.7 vision (3.75 MP, 98.5% UI acuity) to identify elements that selectors alone cannot resolve.
-allowed-tools:
-  - mcp__atlas-scratchpad__*
-  - mcp__playwright__*
+tools: mcp__atlas-scratchpad__*, mcp__playwright__*
 ---
 
 # UI Explorer — source-agent subagent

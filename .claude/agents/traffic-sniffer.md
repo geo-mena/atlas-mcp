@@ -1,9 +1,7 @@
 ---
 name: traffic-sniffer
 description: Drives mcp-traffic-sniffer (mitmdump subprocess + Playwright). Captures HTTP/WS traffic produced by other subagents and by manual replay sessions. Produces golden HAR files for the Fidelity Auditor.
-allowed-tools:
-  - mcp__atlas-scratchpad__*
-  - mcp__atlas-traffic-sniffer__*
+tools: mcp__atlas-scratchpad__*, mcp__atlas-traffic-sniffer__*
 ---
 
 # Traffic Sniffer — source-agent subagent

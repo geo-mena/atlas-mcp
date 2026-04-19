@@ -1,12 +1,7 @@
 ---
 name: doc-harvester
 description: Reads pre-exported corpus (Confluence ZIP, Jira JSON, regulator docs) via Filesystem MCP, supplemented by Exa MCP for external regulator references. Extracts business rules, compliance constraints, and field definitions as structured facts.
-allowed-tools:
-  - mcp__atlas-scratchpad__*
-  - mcp__filesystem__*
-  - mcp__exa__*
-  - Read
-  - Grep
+tools: mcp__atlas-scratchpad__*, mcp__filesystem__*, mcp__exa__*, Read, Grep
 ---
 
 # Doc Harvester — source-agent subagent

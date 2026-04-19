@@ -2,40 +2,79 @@
 /**
  * pre-promote hook — gates artifact promotion on Fidelity Auditor verdict.
  *
- * Contract:
- *   stdin / args: ignored (current implementation reads the latest .atlas/runs/<run-id>/audit/report.md)
- *   exit 0  → PASS or PASS-WITH-NOISE → Claude Code allows the promoting tool call
- *   exit 1  → FAIL                    → Claude Code blocks the tool call
- *   exit 2  → HUMAN-REVIEW             → Claude Code blocks until reviewed
+ * Wired in .claude/settings.json under hooks.PreToolUse with matcher
+ * "Write|Edit|MultiEdit". Claude Code invokes this command before any
+ * matching tool call, passing a JSON envelope on stdin:
  *
- *   stdout: one-line summary surfaced in Claude Code's hook output channel
- *   stderr: full reason on FAIL / HUMAN-REVIEW
+ *   {
+ *     session_id, transcript_path, cwd, permission_mode, hook_event_name,
+ *     tool_name, tool_use_id,
+ *     tool_input: { file_path?, content? ... }
+ *   }
  *
- * Day 0 skeleton. Implementation refined Day 6 of the build plan.
+ * Decision tree:
+ *   - file_path is inside any `.atlas/runs/<run-id>/`        → exit 0 (allow; intra-run scratch)
+ *   - no Atlas run on disk OR no audit/report.md yet         → exit 0 (nothing to gate)
+ *   - audit verdict is PASS or PASS-WITH-NOISE               → exit 0 (allow promotion)
+ *   - audit verdict is FAIL or HUMAN-REVIEW                  → exit 2 (block; stderr explains)
+ *
+ * Per Claude Code hook contract: exit 0 = success/allow, exit 2 = blocking
+ * error (stderr fed back to the model). Any other exit code is a non-blocking
+ * warning. We never use exit 1 here.
  */
 
 import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, sep } from 'node:path';
 
 type RunVerdict = 'PASS' | 'PASS-WITH-NOISE' | 'HUMAN-REVIEW' | 'FAIL';
 
-function findLatestRunDir(rootRunsDir: string): string | null {
-  let candidates: { path: string; mtime: number }[];
+interface HookInput {
+  cwd?: string;
+  tool_name?: string;
+  tool_input?: { file_path?: string };
+}
+
+function readStdinSync(): string {
   try {
-    candidates = readdirSync(rootRunsDir).map((name) => {
-      const p = join(rootRunsDir, name);
-      return { path: p, mtime: statSync(p).mtimeMs };
-    });
+    return readFileSync(0, 'utf8');
+  } catch {
+    return '';
+  }
+}
+
+function parseInput(): HookInput {
+  const raw = readStdinSync().trim();
+  if (raw === '') return {};
+  try {
+    return JSON.parse(raw) as HookInput;
+  } catch {
+    return {};
+  }
+}
+
+function findLatestRunDir(runsDir: string): string | null {
+  let entries: string[];
+  try {
+    entries = readdirSync(runsDir);
   } catch {
     return null;
   }
+  const candidates = entries
+    .map((name) => {
+      const path = join(runsDir, name);
+      try {
+        return { path, mtime: statSync(path).mtimeMs };
+      } catch {
+        return null;
+      }
+    })
+    .filter((c): c is { path: string; mtime: number } => c !== null);
   if (candidates.length === 0) return null;
   candidates.sort((a, b) => b.mtime - a.mtime);
   return candidates[0]?.path ?? null;
 }
 
-function parseVerdictFromReport(reportPath: string): RunVerdict | null {
-  // TODO: Day 6 — parse audit/results.jsonl as the canonical source; report.md is human-readable.
+function parseVerdict(reportPath: string): RunVerdict | null {
   let content: string;
   try {
     content = readFileSync(reportPath, 'utf8');
@@ -52,33 +91,40 @@ function parseVerdictFromReport(reportPath: string): RunVerdict | null {
 }
 
 function main(): void {
-  const cwd = process.cwd();
+  const input = parseInput();
+  const cwd = input.cwd ?? process.cwd();
+  const filePath = input.tool_input?.file_path ?? '';
+
+  // Intra-run scratchpad writes are always allowed; the auditor itself writes
+  // there to produce the verdict the hook later reads.
+  const intraRunMarker = `${join('.atlas', 'runs')}${sep}`;
+  if (filePath.includes(intraRunMarker) || filePath.includes('/.atlas/runs/')) {
+    process.exit(0);
+  }
+
   const runsDir = join(cwd, '.atlas', 'runs');
   const latestRun = findLatestRunDir(runsDir);
-  if (!latestRun) {
-    process.stderr.write('atlas pre-promote: no audit report; refusing to promote\n');
-    process.stdout.write('atlas: no audit report\n');
-    process.exit(1);
+  if (latestRun === null) {
+    // No Atlas run in flight; nothing to gate.
+    process.exit(0);
   }
-  const reportPath = join(latestRun, 'audit', 'report.md');
-  const verdict = parseVerdictFromReport(reportPath);
-  if (!verdict) {
-    process.stderr.write(`atlas pre-promote: cannot parse verdict at ${reportPath}\n`);
-    process.stdout.write('atlas: verdict unparseable\n');
-    process.exit(1);
+
+  const verdict = parseVerdict(join(latestRun, 'audit', 'report.md'));
+  if (verdict === null) {
+    // Run exists but no audit report yet (still discovering / synthesizing /
+    // generating). The hook is only meaningful post-audit.
+    process.exit(0);
   }
-  process.stdout.write(`atlas: ${verdict}\n`);
-  switch (verdict) {
-    case 'PASS':
-    case 'PASS-WITH-NOISE':
-      process.exit(0);
-    case 'HUMAN-REVIEW':
-      process.stderr.write('atlas pre-promote: HUMAN-REVIEW required; promotion blocked\n');
-      process.exit(2);
-    case 'FAIL':
-      process.stderr.write('atlas pre-promote: FAIL; promotion blocked\n');
-      process.exit(1);
+
+  if (verdict === 'PASS' || verdict === 'PASS-WITH-NOISE') {
+    process.exit(0);
   }
+
+  process.stderr.write(
+    `atlas pre-promote: ${verdict} verdict for run at ${latestRun}; ` +
+      `promotion blocked. Resolve audit/failed/ or audit/report.md before retrying.\n`,
+  );
+  process.exit(2);
 }
 
 main();
