@@ -14,7 +14,7 @@ Legacy reverse-engineering is the slowest gate in any monolith-to-microservices 
 
 ```mermaid
 flowchart TD
-  user[User: /atlas reverse-engineer &lt;target&gt;] --> skill[/atlas skill]
+  user["User: /atlas reverse-engineer &lt;target&gt;"] --> skill["/atlas skill"]
 
   subgraph claudecode[Claude Code session — Pro/Max]
     skill -->|dispatch| codeS[code-spelunker subagent]
