@@ -36,7 +36,8 @@
     "@atlas/mcp-scratchpad": "workspace:*",
     "@atlas/mcp-synthesizer": "workspace:*",
     "@atlas/mcp-traffic-sniffer": "workspace:*",
-    "@atlas/shared": "workspace:*"
+    "@atlas/shared": "workspace:*",
+    "yaml": "^2.6.0"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",

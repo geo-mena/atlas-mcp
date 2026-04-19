@@ -1,0 +1,29 @@
+{
+  "mcpServers": {
+    "atlas-scratchpad": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["./packages/mcp-scratchpad/dist/bin.js"]
+    },
+    "atlas-synthesizer": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["./packages/mcp-synthesizer/dist/bin.js"]
+    },
+    "atlas-fidelity-auditor": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["./packages/mcp-fidelity-auditor/dist/bin.js"]
+    },
+    "atlas-traffic-sniffer": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["./packages/mcp-traffic-sniffer/dist/bin.js"]
+    },
+    "atlas-generators": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["./packages/generators/dist/bin.js"]
+    }
+  }
+}

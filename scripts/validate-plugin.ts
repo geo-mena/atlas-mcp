@@ -29,8 +29,11 @@ interface McpServerConfig {
 }
 
 interface PluginSettings {
-  mcpServers: Record<string, McpServerConfig>;
   hooks?: Record<string, unknown>;
+}
+
+interface ProjectMcpConfig {
+  mcpServers: Record<string, McpServerConfig>;
 }
 
 interface JsonRpcResponse {
@@ -50,25 +53,31 @@ function log(line: string): void {
 }
 
 async function main(): Promise<void> {
-  log(`==> install .claude/ bundle to ${TEST_DIR}`);
+  log(`==> install .claude/ bundle + .mcp.json to ${TEST_DIR}`);
   mkdirSync(TEST_DIR, { recursive: true });
   cpSync(join(REPO_ROOT, '.claude'), TEST_CLAUDE, { recursive: true });
-  log(`    OK (copied .claude/ — settings.local.json excluded by gitignore in real installs)`);
+  cpSync(join(REPO_ROOT, '.mcp.json'), join(TEST_DIR, '.mcp.json'));
+  log(`    OK (copied .claude/ + .mcp.json — settings.local.json excluded by gitignore in real installs)`);
 
-  log('==> verify settings.json structure');
+  log('==> verify .claude/settings.json structure (hooks only)');
   const settingsRaw = readFileSync(join(TEST_CLAUDE, 'settings.json'), 'utf8');
   const settings = JSON.parse(settingsRaw) as PluginSettings;
-  if (!settings.mcpServers || Object.keys(settings.mcpServers).length === 0) {
-    throw new Error('settings.json missing mcpServers');
-  }
   if (!settings.hooks || typeof settings.hooks !== 'object') {
     throw new Error('settings.json missing hooks');
   }
-  log(`    OK (${Object.keys(settings.mcpServers).length} MCP servers, hooks block present)`);
+  log(`    OK (hooks block present)`);
+
+  log('==> verify .mcp.json (project-scoped MCP servers)');
+  const mcpRaw = readFileSync(join(TEST_DIR, '.mcp.json'), 'utf8');
+  const mcpConfig = JSON.parse(mcpRaw) as ProjectMcpConfig;
+  if (!mcpConfig.mcpServers || Object.keys(mcpConfig.mcpServers).length === 0) {
+    throw new Error('.mcp.json missing mcpServers');
+  }
+  log(`    OK (${Object.keys(mcpConfig.mcpServers).length} MCP servers in .mcp.json)`);
 
   log('==> exercise each MCP server (initialize + tools/list)');
   let totalTools = 0;
-  for (const [name, cfg] of Object.entries(settings.mcpServers)) {
+  for (const [name, cfg] of Object.entries(mcpConfig.mcpServers)) {
     const result = await exerciseMcpServer(name, cfg);
     log(`    OK  ${name}: serverInfo="${result.serverName}" tools=${result.toolCount} (${result.toolNames.join(', ')})`);
     totalTools += result.toolCount;

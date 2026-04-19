@@ -1,26 +1,5 @@
 {
-  "mcpServers": {
-    "atlas-scratchpad": {
-      "command": "node",
-      "args": ["./packages/mcp-scratchpad/dist/bin.js"]
-    },
-    "atlas-synthesizer": {
-      "command": "node",
-      "args": ["./packages/mcp-synthesizer/dist/bin.js"]
-    },
-    "atlas-fidelity-auditor": {
-      "command": "node",
-      "args": ["./packages/mcp-fidelity-auditor/dist/bin.js"]
-    },
-    "atlas-traffic-sniffer": {
-      "command": "node",
-      "args": ["./packages/mcp-traffic-sniffer/dist/bin.js"]
-    },
-    "atlas-generators": {
-      "command": "node",
-      "args": ["./packages/generators/dist/bin.js"]
-    }
-  },
+  "_note": "Project-scoped MCP servers live in .mcp.json at the project root, not here. Claude Code reads MCP servers only from .mcp.json (project scope) or ~/.claude.json (local/user scope). This file holds permissions and hooks that are project-scoped via .claude/settings.json.",
   "hooks": {
     "PreToolUse": [
       {
