@@ -24,6 +24,7 @@
     "smoke": "tsx scripts/smoke.ts",
     "e2e": "pnpm build && tsx scripts/e2e.ts",
     "validate-agents": "tsx scripts/validate-agents.ts",
+    "validate-plugin": "pnpm build && tsx scripts/validate-plugin.ts",
     "sandbox:up": "docker compose -f apps/sandbox/docker-compose.yml up -d",
     "sandbox:down": "docker compose -f apps/sandbox/docker-compose.yml down",
     "sandbox:seed": "docker compose -f apps/sandbox/docker-compose.yml exec -T mysql mysql -uroot -proot atlas_sandbox < apps/sandbox/db/seed.sql",
