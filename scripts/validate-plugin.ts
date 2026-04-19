@@ -89,7 +89,8 @@ async function main(): Promise<void> {
   log('    OK (intra-run allow, no-run allow, PASS allow, FAIL block-with-exit-2)');
 
   log('==> verify subagent + skill frontmatter has `tools` field');
-  verifyAgentFrontmatter(join(TEST_CLAUDE, 'skills', 'atlas.md'));
+  // Skills live at <skills>/<name>/SKILL.md per Claude Code convention.
+  verifyAgentFrontmatter(join(TEST_CLAUDE, 'skills', 'atlas', 'SKILL.md'));
   for (const agent of ['code-spelunker', 'ui-explorer', 'traffic-sniffer', 'doc-harvester']) {
     verifyAgentFrontmatter(join(TEST_CLAUDE, 'agents', `${agent}.md`));
   }

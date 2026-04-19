@@ -28,6 +28,8 @@ interface ValidationIssue {
 const REQUIRED_AGENT_SECTIONS = ['## Role', '## Discovery loop'];
 const REQUIRED_SKILL_SECTIONS = ['## Invocation'];
 
+const SKILL_FILENAME = 'SKILL.md';
+
 const KNOWN_TOOL_PREFIXES = [
   'mcp__atlas-scratchpad__',
   'mcp__atlas-synthesizer__',
@@ -47,7 +49,7 @@ function main(): void {
 
   const issues: ValidationIssue[] = [
     ...validateDir(join(claudeDir, 'agents'), repoRoot, REQUIRED_AGENT_SECTIONS),
-    ...validateDir(join(claudeDir, 'skills'), repoRoot, REQUIRED_SKILL_SECTIONS),
+    ...validateSkillsDir(join(claudeDir, 'skills'), repoRoot, REQUIRED_SKILL_SECTIONS),
   ];
 
   if (issues.length === 0) {
@@ -76,6 +78,49 @@ function validateDir(dir: string, repoRoot: string, requiredSections: readonly s
     const fullPath = join(dir, entry);
     if (!statSync(fullPath).isFile() || !entry.endsWith('.md')) continue;
     issues.push(...validateFile(fullPath, repoRoot, requiredSections));
+  }
+  return issues;
+}
+
+/**
+ * Skills live in `<skills>/<name>/SKILL.md` per Claude Code convention.
+ * A bare `<skills>/<name>.md` is silently ignored at discovery, so we flag
+ * it as an error rather than skipping silently.
+ */
+function validateSkillsDir(dir: string, repoRoot: string, requiredSections: readonly string[]): ValidationIssue[] {
+  let entries: string[];
+  try {
+    entries = readdirSync(dir);
+  } catch {
+    return [{ file: relative(repoRoot, dir), severity: 'error', message: 'directory missing' }];
+  }
+
+  const issues: ValidationIssue[] = [];
+  for (const entry of entries) {
+    const fullPath = join(dir, entry);
+    const stat = statSync(fullPath);
+    if (stat.isFile() && entry.endsWith('.md')) {
+      issues.push({
+        file: relative(repoRoot, fullPath),
+        severity: 'error',
+        message: `skill must live at .claude/skills/${entry.replace(/\.md$/, '')}/${SKILL_FILENAME}, not as a bare ${entry}; Claude Code only discovers skills in <name>/SKILL.md form`,
+      });
+      continue;
+    }
+    if (stat.isDirectory()) {
+      const skillFile = join(fullPath, SKILL_FILENAME);
+      try {
+        if (!statSync(skillFile).isFile()) continue;
+      } catch {
+        issues.push({
+          file: relative(repoRoot, fullPath),
+          severity: 'error',
+          message: `skill directory missing ${SKILL_FILENAME}`,
+        });
+        continue;
+      }
+      issues.push(...validateFile(skillFile, repoRoot, requiredSections));
+    }
   }
   return issues;
 }
