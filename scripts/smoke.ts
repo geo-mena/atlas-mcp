@@ -18,13 +18,15 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
 import { Scratchpad, readFacts, writeFact } from '@atlas/mcp-scratchpad';
+import { synthesize } from '@atlas/mcp-synthesizer';
 import { Proxy, parseHar, summarizeHar, type Spawner } from '@atlas/mcp-traffic-sniffer';
 
 function main(): void {
   smokeScratchpad();
   smokeTrafficSniffer();
+  smokeSynthesizer();
   smokeAgentValidator();
-  process.stdout.write('atlas smoke OK (Day 3: scratchpad + traffic-sniffer + agent validator)\n');
+  process.stdout.write('atlas smoke OK (Day 4: scratchpad + traffic-sniffer + synthesizer + agent validator)\n');
 }
 
 function smokeScratchpad(): void {
@@ -106,6 +108,65 @@ function smokeTrafficSniffer(): void {
   const summary = summarizeHar(har.log.entries);
   assert.equal(summary.count, 1);
   assert.equal(summary.methods['POST'], 1);
+}
+
+function smokeSynthesizer(): void {
+  const tmp = mkdtempSync(join(tmpdir(), 'atlas-smoke-synth-'));
+  const scratchpad = new Scratchpad(join(tmp, 'smoke.sqlite'));
+
+  try {
+    scratchpad.migrate();
+
+    // Two unanimous source-agent facts about the same route → 1 merged_fact, unanimous.
+    writeFact(scratchpad, {
+      run_id: 'synth-smoke',
+      source_agent: 'code-spelunker',
+      fact_type: 'route',
+      content: { method: 'POST', path: '/ve/invoice' },
+      evidence_uri: 'file:///legacy/index.php#L42',
+      confidence: 'high',
+    });
+    writeFact(scratchpad, {
+      run_id: 'synth-smoke',
+      source_agent: 'traffic-sniffer',
+      fact_type: 'route',
+      content: { method: 'POST', path: '/ve/invoice' },
+      evidence_uri: 'har://golden#0',
+      confidence: 'high',
+    });
+
+    // Cross-source disagreement on field type → 1 merged_fact, priority (traffic wins).
+    writeFact(scratchpad, {
+      run_id: 'synth-smoke',
+      source_agent: 'code-spelunker',
+      fact_type: 'field_definition',
+      content: { name: 'amount', type: 'integer' },
+      evidence_uri: 'file:///legacy/Models/Invoice.php#L8',
+      confidence: 'high',
+    });
+    writeFact(scratchpad, {
+      run_id: 'synth-smoke',
+      source_agent: 'traffic-sniffer',
+      fact_type: 'field_definition',
+      content: { name: 'amount', type: 'decimal' },
+      evidence_uri: 'har://golden#1',
+      confidence: 'high',
+    });
+
+    const result = synthesize(scratchpad, 'synth-smoke');
+    assert.equal(result.source_fact_count, 4);
+    assert.equal(result.merged_count, 2);
+    assert.equal(result.resolutions['unanimous'], 1);
+    assert.equal(result.resolutions['priority'], 1);
+    assert.equal(result.unresolved_count, 0);
+
+    // Idempotency check.
+    const second = synthesize(scratchpad, 'synth-smoke');
+    assert.equal(second.merged_count, 2, 'expected idempotent re-synthesis');
+  } finally {
+    scratchpad.close();
+    rmSync(tmp, { recursive: true, force: true });
+  }
 }
 
 function smokeAgentValidator(): void {

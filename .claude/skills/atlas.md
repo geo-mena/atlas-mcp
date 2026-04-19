@@ -1,6 +1,6 @@
 ---
 name: atlas
-description: Reverse-engineer a legacy target into deployable OpenAPI + MCP + fidelity-test artifacts. Dispatches four discovery subagents in parallel, synthesizes their findings, generates artifacts, and gates promotion on the Fidelity Auditor.
+description: Reverse-engineer a legacy target into deployable OpenAPI + MCP + fidelity-test artifacts. Dispatches four discovery subagents in parallel, synthesizes their findings via deterministic policy, generates artifacts (Day 5+), and gates promotion on the Fidelity Auditor (Day 6+).
 allowed-tools:
   - mcp__atlas-scratchpad__*
   - mcp__atlas-synthesizer__*
@@ -14,64 +14,104 @@ allowed-tools:
 
 # /atlas — Atlas orchestrator skill
 
-> Skeleton. Day 0 placeholder. Discovery loop and dispatch contract refined Day 4 of the build plan.
-
 ## Invocation
 
 ```
 /atlas reverse-engineer <target> [--scope <hint>] [--output <dir>]
 ```
 
-- `<target>` — URL of a running legacy UI, or filesystem path to a legacy codebase
-- `--scope` — optional natural-language hint to narrow exploration (e.g. "invoice issuance only")
-- `--output` — optional output directory; defaults to `.atlas/runs/<run-id>/`
+- `<target>` — URL of a running legacy UI (e.g. `http://localhost:8080`) OR filesystem path to a legacy codebase root
+- `--scope` — optional natural-language hint to narrow exploration (e.g. `"invoice issuance only"`)
+- `--output` — optional output directory; defaults to `.atlas/runs/<run_id>/`
 
 ## Run directory convention
 
 ```
-.atlas/runs/<run-id>/
-├── scratchpad.sqlite          # facts written by source agents (via mcp-scratchpad)
+.atlas/runs/<run_id>/
+├── scratchpad.sqlite          # facts + merged_facts (mcp-scratchpad-managed)
 ├── transcripts/               # per-subagent transcripts captured by Claude Code
-├── artifacts/
+├── golden.har                 # mcp-traffic-sniffer output (when applicable)
+├── conflicts.md               # human-review surface (Phase 4)
+├── artifacts/                 # generated OpenAPI / MCP / tests (Day 5+)
 │   ├── openapi.yaml
-│   ├── mcp-server/            # generated TS MCP scaffold
-│   └── tests/                 # generated vitest + nock cassettes
-└── audit/
+│   ├── mcp-server/
+│   └── tests/
+└── audit/                     # Fidelity Auditor output (Day 6+)
     ├── results.jsonl
     ├── coverage.md
     ├── failed/
     └── report.md
 ```
 
-## Dispatch loop (intended behavior — TBD implementation Day 4)
+## Phase 1 — Initialize run
 
-1. Parse arguments, generate `run-id`, create the run directory.
-2. Dispatch the four source-agent subagents IN PARALLEL via the `Agent` tool with budget guidance:
+1. Generate `run_id` of the form `atlas-YYYYMMDD-HHMMSS-<random4>` using the current UTC timestamp.
+2. Create the run directory at `.atlas/runs/<run_id>/`.
+3. Set environment so MCPs share the scratchpad path:
+   - `ATLAS_RUN_ID=<run_id>`
+   - `ATLAS_SCRATCHPAD_PATH=.atlas/runs/<run_id>/scratchpad.sqlite`
+   - `ATLAS_RUNS_ROOT=.atlas/runs`
+4. Call `mcp__atlas-scratchpad__migrate` to ensure schema is in place. This is idempotent.
 
-   | Subagent | Token target | Wall-clock | Tool-call cap |
-   | --- | --- | --- | --- |
-   | code-spelunker | 200K | 30 min | 500 |
-   | ui-explorer | 400K | 45 min | 200 |
-   | traffic-sniffer | 100K | 30 min | n/a |
-   | doc-harvester | 150K | 20 min | 100 |
+## Phase 2 — Dispatch source agents (parallel)
 
-3. Wait for all four to return. Verify scratchpad fact counts meet minimum thresholds (see `[[12 — Synthetic Sandbox#11. Discoverability checklist]]` in vault). Re-dispatch any subagent whose fact count is below threshold.
-4. Invoke `mcp-synthesizer.synthesize(run_id)` to merge facts and resolve conflicts. Block if unresolved conflicts on critical fields exist.
-5. Invoke the three generators sequentially against the merged scratchpad:
-   - `emit-openapi` → `artifacts/openapi.yaml`
-   - `emit-mcp-server` → `artifacts/mcp-server/`
-   - `emit-test-suite` → `artifacts/tests/`
-6. Invoke `mcp-fidelity-auditor.audit(run_id)`. Output is `audit/report.md` plus per-scenario JSONL.
-7. The `pre-promote` hook intercepts any subsequent file write outside the run directory and exits non-zero on FAIL — do NOT bypass.
+Use the `Agent` tool to invoke the four source-agent subagents IN PARALLEL. Per-agent budgets and tool surfaces are declared in their respective `.claude/agents/*.md` files.
+
+| Subagent | Inputs | Token target | Wall-clock | Tool-call cap |
+| --- | --- | --- | --- | --- |
+| `code-spelunker` | `run_id`, `target_path`, `scope_hint?` | 200K | 30 min | 500 |
+| `ui-explorer` | `run_id`, `target_url`, `entry_path?`, `auth_artifact?` | 400K | 45 min | 200 |
+| `traffic-sniffer` | `run_id`, `correlation_with: ["ui-explorer", "manual"]` | 100K | 30 min | n/a |
+| `doc-harvester` | `run_id`, `corpus_path`, `external_search_terms?` | 150K | 20 min | 100 |
+
+Dispatch all four with a single message containing four parallel `Agent` invocations. Wait for all to return.
+
+## Phase 3 — Verify discovery
+
+Read fact counts per source via `mcp__atlas-scratchpad__read_facts({ run_id, source_agent })`.
+
+Minimum thresholds (calibrated against the synthetic sandbox in `[[12 — Synthetic Sandbox]]`):
+
+| Source | Minimum facts |
+| --- | --- |
+| code-spelunker | 30 |
+| ui-explorer | 12 |
+| traffic-sniffer | 8 |
+| doc-harvester | 10 |
+| **total** | **≥ 60** |
+
+If any source is below threshold, re-dispatch that subagent with a stricter `scope_hint` derived from the gap. Cap re-dispatches at 1 per source. If the gap persists, write a `partial_progress` summary to the run directory and surface the gap to the operator before proceeding to Phase 4.
+
+## Phase 4 — Synthesize
+
+1. Call `mcp__atlas-synthesizer__synthesize({ run_id })`. Returns `{ source_fact_count, merged_count, resolutions, unresolved_count }`.
+2. If `unresolved_count > 0`, call `mcp__atlas-synthesizer__conflicts({ run_id })` and write a human-review report at `.atlas/runs/<run_id>/conflicts.md` listing each unresolved key, the conflicting source fact ids, and the candidate contents.
+3. If `unresolved_count > 0` AND the operator did not pass `--ignore-conflicts`, halt the run with a clear summary. The Generators stage (Phase 5) requires a clean merge.
+
+## Phase 5 — Generators (Day 5+)
+
+Not implemented yet. When the synthesis produces a clean merged_facts set, the Generators stage will sequentially invoke:
+
+- `emit-openapi` — OpenAPI 3.1 spec at `artifacts/openapi.yaml`
+- `emit-mcp-server` — TypeScript MCP scaffold at `artifacts/mcp-server/`
+- `emit-test-suite` — Vitest + nock cassettes at `artifacts/tests/`
+
+For Day 4 stop here and report the merged_facts summary to the operator.
+
+## Phase 6 — Audit (Day 6+)
+
+Not implemented yet. Will invoke `mcp__atlas-fidelity-auditor__audit({ run_id })` and rely on the `pre-promote` hook to gate artifact promotion.
 
 ## Exit conditions
 
-- PASS: artifacts promoted out of the run directory; user is shown the install command for the generated MCP.
-- HUMAN-REVIEW: artifacts stay in the run directory; reviewer is pointed at `audit/failed/`.
-- FAIL: artifacts stay in the run directory; the failure summary is surfaced and dispatch stops.
+- **PASS** (Day 4 scope) — `unresolved_count === 0` and per-source thresholds met. Synthesis report surfaced to operator.
+- **HUMAN-REVIEW** — `unresolved_count > 0`. Run directory retains all artifacts; `conflicts.md` lists what to resolve.
+- **FAIL** — A source-agent subagent returned an error envelope; per-source threshold cannot be reached after one re-dispatch attempt. Run directory retained for diagnostics; operator decides whether to retry or abort.
 
 ## Don't
 
-- Don't bypass the `pre-promote` hook on FAIL.
-- Don't dispatch source agents serially as a "fallback" — parallel dispatch is the contract.
-- Don't write outside `.atlas/runs/<run-id>/` until after the auditor PASS.
+- Don't dispatch source agents serially as a fallback — parallel dispatch is the contract per `[[04 — Architecture#2. Orchestrator]]`.
+- Don't bypass `mcp__atlas-scratchpad` to write directly to the SQLite file — the cross-agent invariant is enforced at the MCP layer.
+- Don't promote artifacts when `unresolved_count > 0` unless the operator explicitly opts in. The deterministic auditor (Day 6+) will refuse anyway, but Phase 5 must respect the same gate.
+- Don't re-dispatch a subagent more than once per run.
+- Don't write outside `.atlas/runs/<run_id>/` until artifact promotion (post-audit).

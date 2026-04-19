@@ -11,6 +11,9 @@ importers:
       '@atlas/mcp-scratchpad':
         specifier: workspace:*
         version: link:packages/mcp-scratchpad
+      '@atlas/mcp-synthesizer':
+        specifier: workspace:*
+        version: link:packages/mcp-synthesizer
       '@atlas/mcp-traffic-sniffer':
         specifier: workspace:*
         version: link:packages/mcp-traffic-sniffer
@@ -100,6 +103,9 @@ importers:
 
   packages/mcp-synthesizer:
     dependencies:
+      '@atlas/mcp-scratchpad':
+        specifier: workspace:*
+        version: link:../mcp-scratchpad
       '@atlas/shared':
         specifier: workspace:*
         version: link:../shared
