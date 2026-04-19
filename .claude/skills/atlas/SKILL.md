@@ -90,8 +90,6 @@ Sequentially invoke the three generator tools against the cleaned merged_facts s
 
 If `path_count === 0` OR `tool_count === 0`, the run did not yield enough discovery to be deployable; surface that to the operator and halt before Phase 6.
 
-## Phase 6 — Audit (Day 6+)
-
 ## Phase 6 — Audit
 
 After Phase 5 emits artifacts, build the auditor input by pairing each `http_request`/`http_response` scenario captured by Traffic Sniffer (legacy_response) with the same request executed against the generated MCP (candidate_response). Then call:
