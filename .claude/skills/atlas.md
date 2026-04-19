@@ -101,9 +101,29 @@ If `path_count === 0` OR `tool_count === 0`, the run did not yield enough discov
 
 ## Phase 6 — Audit (Day 6+)
 
-## Phase 6 — Audit (Day 6+)
+## Phase 6 — Audit
 
-Not implemented yet. Will invoke `mcp__atlas-fidelity-auditor__audit({ run_id })` and rely on the `pre-promote` hook to gate artifact promotion.
+After Phase 5 emits artifacts, build the auditor input by pairing each `http_request`/`http_response` scenario captured by Traffic Sniffer (legacy_response) with the same request executed against the generated MCP (candidate_response). Then call:
+
+```
+mcp__atlas-fidelity-auditor__audit({
+  run_id,
+  audit_dir: ".atlas/runs/<run_id>/audit",
+  scenarios: [...],
+  pass_threshold: 0.9,
+  noise_allowlist: ["$.timestamp", "$.request_id", "$.fiscal_sequence", "$.control_number"],
+  normalization: {
+    scrub_paths: ["$.timestamp", "$.request_id"],
+    masks: [
+      { pattern: "VE-\\d+", replacement: "VE-<n>" }
+    ]
+  }
+})
+```
+
+The auditor writes `audit/results.jsonl`, `audit/report.md`, `audit/coverage.md`, and `audit/failed/` under the run directory. The first non-blank line of `report.md` is `Run verdict: <PASS|PASS-WITH-NOISE|HUMAN-REVIEW|FAIL>` — the `pre-promote` hook parses that line.
+
+If the run verdict is FAIL or unattended HUMAN-REVIEW, the `pre-promote` hook (`.claude/hooks/pre-promote.sh`) blocks any subsequent file write outside `.atlas/runs/<run_id>/`. Do not attempt to bypass.
 
 ## Exit conditions
 

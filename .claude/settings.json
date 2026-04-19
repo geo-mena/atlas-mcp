@@ -12,7 +12,7 @@
     },
     "atlas-fidelity-auditor": {
       "command": "node",
-      "args": ["./packages/mcp-fidelity-auditor/dist/index.js"]
+      "args": ["./packages/mcp-fidelity-auditor/dist/bin.js"]
     },
     "atlas-traffic-sniffer": {
       "command": "node",

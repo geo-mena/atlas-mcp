@@ -13,7 +13,7 @@ import type { ChildProcess } from 'node:child_process';
 import { spawnSync } from 'node:child_process';
 import { EventEmitter } from 'node:events';
 import { strict as assert } from 'node:assert';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
@@ -21,6 +21,7 @@ import { Scratchpad, readFacts, writeFact } from '@atlas/mcp-scratchpad';
 import { synthesize } from '@atlas/mcp-synthesizer';
 import { Proxy, parseHar, summarizeHar, type Spawner } from '@atlas/mcp-traffic-sniffer';
 import { emitMcpServer, emitOpenApi, emitTestSuite } from '@atlas/generators';
+import { auditScenarios, writeReports } from '@atlas/mcp-fidelity-auditor';
 import { parse as parseYaml } from 'yaml';
 
 function main(): void {
@@ -28,8 +29,9 @@ function main(): void {
   smokeTrafficSniffer();
   smokeSynthesizer();
   smokeGenerators();
+  smokeFidelityAuditor();
   smokeAgentValidator();
-  process.stdout.write('atlas smoke OK (Day 5: scratchpad + traffic-sniffer + synthesizer + generators + agent validator)\n');
+  process.stdout.write('atlas smoke OK (Day 6: scratchpad + traffic-sniffer + synthesizer + generators + auditor + agent validator)\n');
 }
 
 function smokeScratchpad(): void {
@@ -238,6 +240,73 @@ function smokeGenerators(): void {
     assert.ok(testsResult.files_written.includes('tests/replay.test.ts'));
   } finally {
     scratchpad.close();
+    rmSync(tmp, { recursive: true, force: true });
+  }
+}
+
+function smokeFidelityAuditor(): void {
+  const tmp = mkdtempSync(join(tmpdir(), 'atlas-smoke-audit-'));
+  try {
+    const result = auditScenarios(
+      [
+        {
+          scenario_id: 'pass-byte-equal',
+          request: { method: 'POST', url: 'http://localhost:8080/ve/invoice' },
+          legacy_response: {
+            status: 302,
+            content_type: 'application/json',
+            body: '{"control_number":"VE-1001","status":"authorized"}',
+          },
+          candidate_response: {
+            status: 302,
+            content_type: 'application/json',
+            body: '{"status":"authorized","control_number":"VE-1001"}',
+          },
+        },
+        {
+          scenario_id: 'pass-with-noise-on-timestamp',
+          request: { method: 'GET', url: 'http://localhost:8080/health' },
+          legacy_response: {
+            status: 200,
+            content_type: 'application/json',
+            body: '{"status":"ok","timestamp":"2026-04-18T22:00:00Z"}',
+          },
+          candidate_response: {
+            status: 200,
+            content_type: 'application/json',
+            body: '{"status":"ok","timestamp":"2026-04-18T22:00:01Z"}',
+          },
+        },
+      ],
+      {
+        run_id: 'audit-smoke',
+        classify: { noise_allowlist: ['$.timestamp'] },
+        pass_threshold: 0.9,
+      },
+    );
+
+    assert.equal(result.run_verdict, 'PASS', `expected PASS, got ${result.run_verdict}`);
+    assert.equal(result.counts.PASS, 1);
+    assert.equal(result.counts['PASS-WITH-NOISE'], 1);
+
+    const paths = writeReports(result, join(tmp, 'audit'));
+    const reportMd = readFileSync(paths.report_md, 'utf8');
+    assert.match(reportMd, /Run verdict: PASS/);
+
+    // Negative case: status mismatch must surface as FAIL.
+    const failResult = auditScenarios(
+      [
+        {
+          scenario_id: 'status-mismatch',
+          request: { method: 'GET', url: 'http://localhost:8080/x' },
+          legacy_response: { status: 200, content_type: 'application/json', body: '{}' },
+          candidate_response: { status: 500, content_type: 'application/json', body: '{}' },
+        },
+      ],
+      { run_id: 'audit-smoke-fail' },
+    );
+    assert.equal(failResult.run_verdict, 'FAIL');
+  } finally {
     rmSync(tmp, { recursive: true, force: true });
   }
 }

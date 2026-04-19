@@ -22,6 +22,7 @@
     "test:watch": "vitest",
     "dev": "pnpm -r --parallel --filter './packages/*' run dev",
     "smoke": "tsx scripts/smoke.ts",
+    "e2e": "pnpm build && tsx scripts/e2e.ts",
     "validate-agents": "tsx scripts/validate-agents.ts",
     "sandbox:up": "docker compose -f apps/sandbox/docker-compose.yml up -d",
     "sandbox:down": "docker compose -f apps/sandbox/docker-compose.yml down",
@@ -30,6 +31,7 @@
   },
   "dependencies": {
     "@atlas/generators": "workspace:*",
+    "@atlas/mcp-fidelity-auditor": "workspace:*",
     "@atlas/mcp-scratchpad": "workspace:*",
     "@atlas/mcp-synthesizer": "workspace:*",
     "@atlas/mcp-traffic-sniffer": "workspace:*",

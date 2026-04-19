@@ -1,25 +1,32 @@
-#!/usr/bin/env node
 /**
- * @atlas/mcp-fidelity-auditor — Atlas fidelity auditor MCP server.
+ * @atlas/mcp-fidelity-auditor — public API. Side-effect free.
  *
- * Day 0 skeleton. Implementation lands Day 6.
- *
- * Tools (planned):
- *   audit({ run_id }) → { run_verdict, scenarios: ScenarioResult[] }
- *   diff({ scenario_id, legacy_response, candidate_response }) → DiffResult
- *
- * Diff stack per content type:
- *   application/json → microdiff
- *   application/xml  → xml-c14n + microdiff on parsed tree (+ xml-crypto for signed envelopes)
- *   text/html        → parse5 canonicalization + text diff
- *   application/pdf  → pdf-parse text extraction + text diff
- *   binary           → SHA-256 equality after content-type-aware stripping
- *
- * Fail-closed: silence is rejection. ≥ 90% scenarios must PASS or PASS-WITH-NOISE,
- *              zero FAIL, remainder HUMAN-REVIEW for run-level PASS.
+ * Server boot lives in bin.ts.
  */
 
-// TODO Day 5/6: implement audit loop + per-content-type normalizers.
-// TODO Day 6: emit audit/report.md and audit/results.jsonl in the run directory.
-
-export {};
+export { AuditorError, type AuditorErrorCode } from './errors.js';
+export {
+  normalize,
+  type ContentType,
+  type NormalizationConfig,
+  type NormalizationRule,
+  type NormalizedPayload,
+} from './normalize.js';
+export { runDiff, type DiffChange, type DiffResult } from './diff.js';
+export {
+  classify,
+  aggregateRunVerdict,
+  type ClassifyOptions,
+  type ScenarioClassification,
+} from './classify.js';
+export {
+  auditScenarios,
+  type AuditOptions,
+  type AuditResult,
+  type ResponseBody,
+  type ScenarioInput,
+  type ScenarioResult,
+} from './audit.js';
+export { writeReports, type ReportPaths } from './report.js';
+export { runAudit, type AuditToolResult } from './tools.js';
+export { buildServer } from './server.js';
